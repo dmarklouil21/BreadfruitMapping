@@ -1,29 +1,42 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Slot, SplashScreen, Redirect } from 'expo-router';
+import { AuthProvider, useAuth } from '../context/AuthContext';
+import { PaperProvider } from 'react-native-paper';
+import { useEffect } from 'react';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
-
+  // Add splash screen timeout
+  useEffect(() => {
+    setTimeout(() => SplashScreen.hideAsync(), 1000);
+  }, []);
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <PaperProvider>
+      <AuthProvider>
+        <RoutingController />
+      </AuthProvider>
+    </PaperProvider>
+  );
+}
+
+function RoutingController() {
+  const { user, initialized } = useAuth();
+  
+  useEffect(() => {
+    if (initialized) {
+      SplashScreen.hideAsync();
+    }
+  }, [initialized]);
+
+  if (!initialized) return null;
+
+  return user ? (
+    user.role === 'admin' ? (
+      <Redirect href="/(admin)" />
+    ) : (
+      <Redirect href="/(main)" />
+    )
+  ) : (
+    <Redirect href="/(auth)" />
   );
 }

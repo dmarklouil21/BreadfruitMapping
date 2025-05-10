@@ -16,7 +16,14 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.dmarklouil21.BreadfruitMapping"
     },
     "web": {
       "bundler": "metro",
@@ -24,6 +31,25 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow KULO to access your photos",
+          "cameraPermission": "Allow KULO to access your camera"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow KULO to access your camera"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow KULO to use your location"
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
@@ -37,6 +63,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "48e90659-9b1a-4d79-b772-9c66a19ea58e"
+      }
+    },
+    "owner": "dmarklouil21"
   }
 }
