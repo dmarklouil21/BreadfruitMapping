@@ -1,6 +1,6 @@
 export type Tree = {
     id: string;
-    location: string;
+    city: string;
     diameter: number;
     dateTracked: string;
     fruitStatus?: 'ripe' | 'unripe' | 'none';
@@ -13,10 +13,14 @@ export type Tree = {
   
   export type User = {
     id: string;
+    name: string;
     username: string;
     email: string;
     token: string;
+    image: string;
     role?: 'researcher' | 'admin' | 'viewer';
+    dateJoined: string;
+    //role: string;
   };
   
   export type AuthContextType = {

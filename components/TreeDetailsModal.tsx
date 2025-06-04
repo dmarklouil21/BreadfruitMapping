@@ -41,7 +41,7 @@ export default function TreeDetailsModal({ visible, tree, onClose }: {
 
               <View style={styles.detailRow}>
                 <MaterialIcons name="location-on" size={20} color="#2ecc71" />
-                <Text style={styles.detailText}>{tree.location}</Text>
+                <Text style={styles.detailText}>{tree.city}</Text>
               </View>
 
               <View style={styles.statsContainer}>
@@ -81,59 +81,58 @@ export default function TreeDetailsModal({ visible, tree, onClose }: {
             Close Details
           </Button> */}
           <View style={styles.buttonGroup}>
-          {user?.role === 'researcher' || user?.role === 'admin' ? (
+          {user?.role === 'researcher' ? (
             <Link
               href={{
-                pathname: '/tree/edit/[id]',
-                params: {
+                pathname: `/main/tree/edit/${tree.id}`,
+                /* params: {
                   id: tree.id,
                   location: tree.location,
                   diameter: tree.diameter,
                   dateTracked: tree.dateTracked,
                   fruitStatus: tree.fruitStatus,
                   coordinates: JSON.stringify(tree.coordinates)
-                }
+                } */
               }}
               asChild
             >
               <Button 
                 mode="contained" 
                 style={styles.button}
-                labelStyle={styles.buttonLabel}
+                //labelStyle={styles.buttonLabel}
               >
                 Update Details
               </Button>
             </Link>
-          ) : null}
-
+          ) : (
             <Link
               href={{
-                pathname: '/tree/edit/[id]',
-                params: {
-                  id: tree.id,
-                  location: tree.location,
-                  diameter: tree.diameter,
-                  dateTracked: tree.dateTracked,
-                  fruitStatus: tree.fruitStatus,
-                  coordinates: JSON.stringify(tree.coordinates)
-                }
+                pathname: `/main/tree/process-fruit/${tree.id}`, 
+                /* params: {
+                  treeID: tree.id,
+                  // location: tree.location,
+                  // diameter: tree.diameter,
+                  // dateTracked: tree.dateTracked,
+                  // fruitStatus: tree.fruitStatus,
+                  // coordinates: JSON.stringify(tree.coordinates)
+                } */
               }}
               asChild
             >
               <Button 
                 mode="contained" 
                 style={styles.button}
-                labelStyle={styles.buttonLabel}
+                // labelStyle={styles.buttonLabel}
               >
-                Update Details
+                Send Attachment
               </Button>
             </Link>
-          
+          )} 
             <Button 
               mode="contained" 
               onPress={onClose}
               style={[styles.button, styles.updateButton]}
-              labelStyle={styles.buttonLabel}
+              //labelStyle={styles.buttonLabel}
             >
               Close Details
             </Button>
@@ -225,7 +224,7 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    borderRadius: 8,
+    borderRadius: 25,
     backgroundColor: '#2ecc71',
   },
   updateButton: {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Tree } from '../types'; 
-import { mockTrees } from '../data/mockTrees'; // Direct file reference
+import { Tree } from '@/types'; 
+import { mockTrees } from '@/data/mockTrees'; // Direct file reference
 
 export const useTreeData = () => {
   const [trees, setTrees] = useState<Tree[]>([]);

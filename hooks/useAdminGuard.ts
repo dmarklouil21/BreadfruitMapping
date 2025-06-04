@@ -8,7 +8,7 @@ export const useAdminGuard = () => {
 
   useEffect(() => {
     if (user?.role !== 'admin') {
-      router.replace('/unauthorized');
+      router.replace('/(auth)/login'); // Redirect to login if not admin
     }
   }, [user?.role]);
 };

@@ -1,25 +1,32 @@
-import { Slot, SplashScreen, Redirect } from 'expo-router';
-import { AuthProvider, useAuth } from '../context/AuthContext';
+// app/_layout.tsx
+import { SplashScreen, Redirect, Slot, Stack } from 'expo-router';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { PaperProvider } from 'react-native-paper';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   // Add splash screen timeout
-  useEffect(() => {
+   useEffect(() => {
     setTimeout(() => SplashScreen.hideAsync(), 1000);
+    // SplashScreen.hideAsync(); // Direct call without delay
   }, []);
+
   return (
-    <PaperProvider>
-      <AuthProvider>
-        <RoutingController />
-      </AuthProvider>
-    </PaperProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PaperProvider>
+        <AuthProvider>
+          <Slot />
+        {/* <RoutingController/> */}
+        </AuthProvider>
+      </PaperProvider>
+    </GestureHandlerRootView>
   );
 }
 
-function RoutingController() {
+/* function RoutingController() {
   const { user, initialized } = useAuth();
   
   useEffect(() => {
@@ -32,11 +39,11 @@ function RoutingController() {
 
   return user ? (
     user.role === 'admin' ? (
-      <Redirect href="/(admin)" />
+      <Redirect href="/admin/(tabs)" />
     ) : (
-      <Redirect href="/(main)" />
+      <Redirect href="/main/(tabs)" />
     )
   ) : (
-    <Redirect href="/(auth)" />
+    <Redirect href="/login" />
   );
-}
+} */

@@ -1,10 +1,14 @@
+// components/AuthContext
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import * as SecureStore from 'expo-secure-store';
 
 type User = {
   username?: string;
   email?: string;
   token?: string;
   role?: 'researcher' | 'admin' | 'viewer';
+  image?: string;
+  joined?: string
 };
 
 type AuthContextType = {
@@ -18,13 +22,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false); 
 
   const login = (userData: User) => {
     setUser({
       username: userData.username,
       email: userData.email,
-      token: userData.token
+      token: userData.token,
+      role: userData.role, 
+      image: userData.image,
     });
   };
 
@@ -37,16 +43,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       // Add your actual auth initialization logic here
-      setIsLoading(false);
+      // const storedUser = await SecureStore.getItemAsync('user');
+
+      /* if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      } */
+
+      setInitialized(true);
     };
     
     initAuth();
   }, []);
 
-  if (isLoading) return null;
+  if (!initialized) return null;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      initialized
+    }}>
       {children}
     </AuthContext.Provider>
   );
