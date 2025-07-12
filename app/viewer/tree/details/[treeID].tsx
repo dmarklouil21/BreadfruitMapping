@@ -1,10 +1,9 @@
-// components/TreeDetailsModal.tsx
-import { Modal, StyleSheet, View, Image, ScrollView } from 'react-native';
-import { Button, Text, Card } from 'react-native-paper';
+import { useAuth } from '@/context/AuthContext';
 import { Tree } from '@/types';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
-import { useAuth } from '@/context/AuthContext';
+import { Image, Modal, ScrollView, StyleSheet, View } from 'react-native';
+import { Button, Card, Text } from 'react-native-paper';
 
 export default function TreeDetailsModal({ visible, tree, onClose }: {
   visible: boolean;
@@ -81,41 +80,9 @@ export default function TreeDetailsModal({ visible, tree, onClose }: {
             Close Details
           </Button> */}
           <View style={styles.buttonGroup}>
-          {user?.role === 'researcher' ? (
-            <Link
-              href={{
-                pathname: `/main/tree/edit/${tree.id}`,
-                /* params: {
-                  id: tree.id,
-                  location: tree.location,
-                  diameter: tree.diameter,
-                  dateTracked: tree.dateTracked,
-                  fruitStatus: tree.fruitStatus,
-                  coordinates: JSON.stringify(tree.coordinates)
-                } */
-              }}
-              asChild
-            >
-              <Button 
-                mode="contained" 
-                style={styles.button}
-                //labelStyle={styles.buttonLabel}
-              >
-                Update Details
-              </Button>
-            </Link>
-          ) : (
             <Link
               href={{
                 pathname: `/main/tree/process-fruit/${tree.id}`, 
-                /* params: {
-                  treeID: tree.id,
-                  // location: tree.location,
-                  // diameter: tree.diameter,
-                  // dateTracked: tree.dateTracked,
-                  // fruitStatus: tree.fruitStatus,
-                  // coordinates: JSON.stringify(tree.coordinates)
-                } */
               }}
               asChild
             >
@@ -127,7 +94,37 @@ export default function TreeDetailsModal({ visible, tree, onClose }: {
                 Send Attachment
               </Button>
             </Link>
-          )} 
+            {/* {user?.role === 'researcher' ? (
+              <Link
+                href={{
+                  pathname: `/main/tree/edit/${tree.id}`,
+                }}
+                asChild
+              >
+                <Button 
+                  mode="contained" 
+                  style={styles.button}
+                  //labelStyle={styles.buttonLabel}
+                >
+                  Update Details
+                </Button>
+              </Link>
+            ) : (
+              <Link
+                href={{
+                  pathname: `/main/tree/process-fruit/${tree.id}`, 
+                }}
+                asChild
+              >
+                <Button 
+                  mode="contained" 
+                  style={styles.button}
+                  // labelStyle={styles.buttonLabel}
+                >
+                  Send Attachment
+                </Button>
+              </Link>
+            )} */} 
             <Button 
               mode="contained" 
               onPress={onClose}
@@ -136,7 +133,7 @@ export default function TreeDetailsModal({ visible, tree, onClose }: {
             >
               Close Details
             </Button>
-        </View>
+          </View>
         </View>
       </ScrollView>
     </Modal>

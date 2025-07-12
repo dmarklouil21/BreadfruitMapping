@@ -1,33 +1,33 @@
+export type User = {
+  uid: string;
+  name: string;
+  email: string;
+  role: string;
+  image?: string;
+  status: string;
+  joined: string;
+};
+
 export type Tree = {
-    id: string;
-    city: string;
-    diameter: number;
-    dateTracked: string;
-    fruitStatus?: 'ripe' | 'unripe' | 'none';
-    coordinates: {
-      latitude: number;
-      longitude: number;
-    };
-    image?: string;
+  id: string;
+  city: string;
+  diameter: number;
+  dateTracked: string;
+  fruitStatus?: 'ripe' | 'unripe' | 'none';
+  coordinates: {
+    latitude: number;
+    longitude: number;
   };
+  image?: string;
+};
   
-  export type User = {
-    id: string;
-    name: string;
-    username: string;
-    email: string;
-    token: string;
-    image: string;
-    role?: 'researcher' | 'admin' | 'viewer';
-    dateJoined: string;
-    //role: string;
-  };
-  
-  export type AuthContextType = {
-    user: User | null;
-    login: (userData: User) => void;
-    logout: () => void;
-  };
+export type AuthContextType = {
+  user: User | null;
+  login: (email: string, password: string) => Promise<User | null>;
+  logout: () => Promise<void>;
+  isAuthenticated: boolean;
+  initialized: boolean;
+};
   
   export type CameraCapturedData = {
     uri: string;

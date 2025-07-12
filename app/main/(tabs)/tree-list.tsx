@@ -1,48 +1,17 @@
-import { Stack, Link, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { StyleSheet, View, FlatList, ActivityIndicator, Pressable } from 'react-native';
-import { Searchbar, Text, Card, FAB } from 'react-native-paper';
+import TreeCard from '@/components/TreeCard';
 import { useTreeData } from '@/hooks/useTreeData';
-import { LocationFilter } from '@/components/LocationFilter';
-import { Tree } from '@/types';
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
-import { useAuth } from '@/context/AuthContext';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useMemo, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { FAB, Text } from 'react-native-paper';
 
-const TreeCard = ({ tree }: { tree: Tree }) => (
-  <Link
-    href={{
-      pathname: './map',
-      params: {
-        lat: tree.coordinates.latitude,
-        lng: tree.coordinates.longitude,
-        treeId: tree.id
-      }
-    }}
-    asChild
-  >
-    <Pressable>
-      <Card style={styles.treeCard}>
-        <Card.Content>
-          <Text style={styles.treeID}>
-            <MaterialCommunityIcons name="tree" size={16} color="#2ecc71" />
-            {'  '}Tree #{tree.id}
-          </Text>
-          <Text style={styles.treeDetail}>
-            <MaterialCommunityIcons name="map-marker" size={14} color="#666" />
-            {'  '}{tree.city}
-          </Text>
-        </Card.Content>
-      </Card>
-    </Pressable>
-  </Link>
-);
 
 export default function TreeListScreen() {
-  const { trees, isLoading, error } = useTreeData(); // Custom hook for data fetching
+  const { trees, isLoading, error } = useTreeData(); 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('All'); 
   const router = useRouter();
-  const { user } = useAuth(); 
 
   const filteredTrees = useMemo(() => {
     return trees.filter(tree => {
@@ -70,21 +39,14 @@ export default function TreeListScreen() {
     </View>
   );
 
-  // if (isLoading) return <LoadingView />;
   if (error) return <ErrorView message={error} />;
 
   return (
     <View style={styles.container}>
       <Text variant="titleLarge" style={styles.title}>
         <MaterialCommunityIcons name="tree" size={24} color="#2ecc71" />
-        {'  '}{user?.role === 'researcher' ? ('Tree Management') : ('Breadfruit Trees')}
+        {'  '}Tree Management
       </Text>
-
-      {/* <LocationFilter
-        selected={selectedLocation}
-        onSelect={setSelectedLocation}
-        locations={locations}
-      /> */}
 
       <FlatList
         data={filteredTrees}
@@ -98,14 +60,12 @@ export default function TreeListScreen() {
         }
         contentContainerStyle={styles.listContent}
       />
-      {user?.role === 'researcher' && (
-        <FAB
+      <FAB
         icon="plus"
         style={styles.fab}
         color="white"
         onPress={() => router.push('../tree/add-tree')} 
-        />
-      )}
+      />
     </View>
   );
 }
@@ -113,10 +73,7 @@ export default function TreeListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
-    // alignItems: 'stretch',
     padding: 20,
-    // paddingVertical: 16,
     backgroundColor: '#ffffff',
   }, 
   errorText: {
@@ -131,54 +88,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 22,
   },
-  searchBar: {
-    // marginTop: 0,
-    marginBottom: 10,
-    borderRadius: 8,
-    backgroundColor: '#f8f8f8',
-    elevation: 1,
-    // height: 45,
-  },
-  searchInput: {
-    color: '#333',
-    fontSize: 14,
-  },
-  /* filterContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 16,
-  }, */
-  treeCard: {
-    backgroundColor: '#ffffff',
-    marginBottom: 12,
-    borderRadius: 12,
-    // padding: 5,
-    elevation: 2,
-    borderLeftWidth: 4,
-    borderLeftColor: '#2ecc71',
-    // marginHorizontal: 16,
-    // width: '100%',
-    // alignSelf: 'center',
-  },
-  treeID: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  treeDetail: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-    // marginBottom: 4,
-  },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 40,
-    // marginTop: 40,
   },
   emptyText: {
     fontSize: 16,

@@ -1,23 +1,29 @@
 import { useAuth } from '@/context/AuthContext';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { Avatar, Button, Text } from 'react-native-paper';
-import { router } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
 
   // Get initials for avatar
   const getInitials = () => {
-    if (!user?.username) return 'GU';
-    const names = user.username.split(' ');
+    if (!user?.name) return 'GU';
+    const names = user.name.split(' ');
     return names.map(n => n[0]).join('').slice(0, 2).toUpperCase();
   }; 
 
   // Handle logout
   const handleLogout = () => {
-    logout();
-    router.replace('/login');
+    Alert.alert('Confirm Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          await logout();
+        },
+      },
+    ]);
   }
 
   return (
@@ -31,7 +37,7 @@ export default function ProfileScreen() {
       />
       
       <Text variant="titleLarge" style={styles.name}>
-        {user?.username || 'Guest User'}
+        {user?.name || 'Guest User'}
       </Text>
       
       <Text variant="bodyMedium" style={styles.email}>

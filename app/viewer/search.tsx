@@ -1,24 +1,21 @@
 // app/main/search.tsx
-import { Stack, useRouter } from 'expo-router';
-import { useState, useMemo } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
-import { Searchbar, Text, Card, TextInput } from 'react-native-paper';
-import { useUserData } from '@/hooks/useUserData';
-import { Tree } from '@/types';
+import { useTreeData } from '@/hooks/useTreeData';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'expo-router';
+import { useMemo, useState } from 'react';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { Card, Text, TextInput } from 'react-native-paper';
 
 export default function SearchScreen() {
-  const { users } = useUserData();
+  const { trees } = useTreeData();
   const [searchQuery, setSearchQuery] = useState('');
   const [ isFocuesd, setIsFocused ] = useState(false);
   const router = useRouter();
-  const { user } = useAuth();
 
   const filteredTrees = useMemo(() => {
-    return users.filter(user => 
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.id.toString().includes(searchQuery)
+    return trees.filter(tree => 
+      tree.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tree.id.toString().includes(searchQuery)
     );
   }, [searchQuery]);
 
@@ -26,7 +23,7 @@ export default function SearchScreen() {
     <View style={styles.container}>
       <View style={styles.searchBar}>
             <TextInput
-                placeholder="Search for users..."
+                placeholder="Search for trees..."
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 style={styles.searchInput}
@@ -60,24 +57,28 @@ export default function SearchScreen() {
           <Card 
             style={styles.card}
             onPress={() => router.push({
-              pathname: `/admin/user/${item.id}`,
+              pathname: './(tabs)/map',
+              params: {
+                lat: item.coordinates.latitude,
+                lng: item.coordinates.longitude
+              }
             })}
           >
             <Card.Content>
               <Text style={styles.treeIdText}>
                 <MaterialCommunityIcons name="tree" size={16} color="#2ecc71" />
-                {'  '}{item.name}
+                {'  '}Tree #{item.id}
               </Text>
               <Text style={styles.location}>
                 <MaterialCommunityIcons name="map-marker" size={14} color="#666" />
-                {' '}{item.role}
+                {' '}{item.city}
               </Text>
             </Card.Content>
           </Card>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text>No user found</Text>
+            <Text>No trees found</Text>
           </View>
         }
       />

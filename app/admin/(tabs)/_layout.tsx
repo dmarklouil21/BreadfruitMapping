@@ -1,7 +1,7 @@
-import { Tabs, router } from 'expo-router';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Pressable } from 'react-native';
 import NotificationBell from '@/components/NotificationBell';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { router, Tabs } from 'expo-router';
+import { Pressable } from 'react-native';
 
 export default function TabsLayout() {
   return (
@@ -34,21 +34,38 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="user-list"
+        name="account-management"
         options={{
-          title: 'User List',
+          title: 'Accounts',
           headerRight: () => (
-            <Pressable onPress={() => router.push('../search')}>
+            <Pressable onPress={() => router.push('../user/search')}>
               <MaterialCommunityIcons
                   name='magnify'
                   size={24}
-                  //color='#666'
                   style={{ marginRight: 16 }}
               />
             </Pressable>
           ),
           tabBarIcon: ({ color }) => (
-            <MaterialIcons name="list" size={24} color={color} />
+            <MaterialIcons name="people" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="tree-management"
+        options={{
+          title: 'Trees',
+          headerRight: () => (
+            <Pressable onPress={() => router.push('../tree/search')}>
+              <MaterialCommunityIcons
+                  name='magnify'
+                  size={24}
+                  style={{ marginRight: 16 }}
+              />
+            </Pressable>
+          ),
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="forest" size={24} color={color} />
           ),
         }}
       />

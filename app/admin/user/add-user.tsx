@@ -1,33 +1,37 @@
-// user/add-user.tsx
-/* import NewUserForm from "@/components/NewUserForm";
-
-export default function AddUserScreen() {
-  return (
-    <NewUserForm />
-  );
-} */
-
-// user/add-user.tsx
-import { useState } from 'react';
-import { StyleSheet, View, Image, TouchableOpacity, ScrollView } from 'react-native';
-import { Button, TextInput, Text, Menu } from 'react-native-paper';
-import { useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
+import { LoadingAlert, NotificationAlert } from "@/components/NotificationModal";
+import { functions } from "@/firebaseConfig";
 import { MaterialIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
+import { httpsCallable } from "firebase/functions";
+import { useState } from 'react';
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { Button, Menu, Text, TextInput } from 'react-native-paper';
 
-type UserRole = 'admin' | 'researcher' | 'owner';
 
 export default function NewUserForm() {
   const router = useRouter();
   const [image, setImage] = useState<string | null>(null);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: '' as UserRole,
-  });
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('');
+  const [password1, setPassword1] = useState('');
+  const [password2, setPassword2] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const [notificationVisible, setNotificationVisible] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationType, setNotificationType] = useState('info');
+  
 
   const pickImage = async () => {
     try {
@@ -52,122 +56,163 @@ export default function NewUserForm() {
     }
   };
 
-  const handleSubmit = () => {
-    console.log('New user data:', { ...formData, image });
-    // Add your user registration logic here
-    router.back();
+  const handleSubmit = async () => {
+    if (!name || !email || !password1 || !password2) {
+      setNotificationVisible(true);
+      setNotificationMessage('All fields are required.');
+      return;
+    }
+
+    if (password1 !== password2) {
+      setNotificationVisible(true);
+      setNotificationMessage('Passwords do not match.');
+      return;
+    }
+
+    const createNewUser = httpsCallable(functions, 'createNewUser');
+
+    setLoading(true);
+    try {
+      const result = await createNewUser({
+        name: name,
+        email: email,
+        password: password1,
+        role: role,
+        image: image,
+        status: 'verified',
+        joined: new Date().toISOString(),
+      });
+
+      setNotificationVisible(true);
+      setNotificationMessage('User created successfully.');
+      setNotificationType('success');
+    } catch (error: any) {
+      alert("Registration failed: " + error.message);
+      console.error("Firebase error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        style={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.image} />
-        ) : (
-          <View style={styles.imagePlaceholder}>
-            <MaterialIcons name="add-a-photo" size={40} color="#2ecc71" />
-            <Text style={styles.imageLabel}>Add Profile Picture</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-
-      <TextInput
-        label="Full Name"
-        value={formData.name}
-        onChangeText={text => setFormData({...formData, name: text})}
-        style={styles.input}
-        autoCapitalize="words"
-      />
-
-      <TextInput
-        label="Username"
-        value={formData.name}
-        onChangeText={text => setFormData({...formData, name: text})}
-        style={styles.input}
-        autoCapitalize="words"
-      />
-
-      <TextInput
-        label="Email Address"
-        value={formData.email}
-        onChangeText={text => setFormData({...formData, email: text})}
-        style={styles.input}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-
-      <View style={styles.row}>
-        <TextInput
-          label="Password"
-          value={formData.password}
-          onChangeText={text => setFormData({...formData, password: text})}
-          style={[styles.input, styles.halfWidth]}
-          secureTextEntry
-        />
-
-        <TextInput
-          label="Confirm Password"
-          value={formData.confirmPassword}
-          onChangeText={text => setFormData({...formData, confirmPassword: text})}
-          style={[styles.input, styles.halfWidth]}
-          secureTextEntry
-        />
-      </View>
-
-      <Menu
-        visible={showRoleMenu}
-        onDismiss={() => setShowRoleMenu(false)}
-        anchor={
-          <Button
-            mode="outlined"
-            onPress={() => setShowRoleMenu(true)}
-            style={styles.roleButton} 
-            labelStyle={{color: '#333'}}
-            icon="account-settings"
-          >
-            {formData.role || 'Select Role'}
-          </Button>
-        }
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        // style={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
       >
-        <Menu.Item
-          title="Administrator"
-          onPress={() => {
-            setFormData({...formData, role: 'admin'});
-            setShowRoleMenu(false);
-          }}
-        />
-        <Menu.Item
-          title="Researcher"
-          onPress={() => {
-            setFormData({...formData, role: 'researcher'});
-            setShowRoleMenu(false);
-          }}
-        />
-        <Menu.Item
-          title="Tree Owner"
-          onPress={() => {
-            setFormData({...formData, role: 'owner'});
-            setShowRoleMenu(false);
-          }}
-        />
-      </Menu>
+        <View style={styles.container}>
+          <LoadingAlert visible={loading} message="Please wait..." />
+          <NotificationAlert
+            visible={notificationVisible}
+            message={notificationMessage}
+            type={notificationType}
+            onClose={() => {
+              setNotificationVisible(false)
+              router.push('/admin/(tabs)/account-management')
+            }}
+          />
+          <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+            {image ? (
+              <Image source={{ uri: image }} style={styles.image} />
+            ) : (
+              <View style={styles.imagePlaceholder}>
+                <MaterialIcons name="add-a-photo" size={40} color="#2ecc71" />
+                <Text style={styles.imageLabel}>Add Profile Picture</Text>
+              </View>
+            )}
+          </TouchableOpacity>
 
-      <View style={styles.buttonGroup}>
-        <Button 
-          mode="contained" 
-          onPress={handleSubmit}
-          style={styles.primaryButton}
-          //labelStyle={styles.buttonLabel}
-          icon="account-plus"
-        >
-          Register User
-        </Button>
-      </View>
-    </ScrollView>
+          <TextInput
+            label="Full Name"
+            value={name}
+            onChangeText={setName}
+            // onChangeText={text => setFormData({...formData, name: text})}
+            style={styles.input}
+            autoCapitalize="words"
+          />
+
+          <TextInput
+            label="Email Address"
+            value={email}
+            // onChangeText={text => setFormData({...formData, email: text})}
+            onChangeText={setEmail}
+            style={styles.input}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+
+          <TextInput
+            label="Password"
+            value={password1}
+            onChangeText={setPassword1}
+            // onChangeText={text => setFormData({...formData, password: text})}
+            style={[styles.input, styles.halfWidth]}
+            secureTextEntry
+          />
+
+          <TextInput
+            label="Confirm Password"
+            value={password2}
+            // onChangeText={text => setFormData({...formData, confirmPassword: text})}
+            onChangeText={setPassword2}
+            style={[styles.input, styles.halfWidth]}
+            secureTextEntry
+          />
+
+          <Menu
+            visible={showRoleMenu}
+            onDismiss={() => setShowRoleMenu(false)}
+            anchor={
+              <Button
+                mode="outlined"
+                onPress={() => setShowRoleMenu(true)}
+                style={styles.roleButton} 
+                labelStyle={{color: '#333'}}
+                // icon="account-settings"
+              >
+                {role || 'Select Role'}
+              </Button>
+            }
+          >
+            <Menu.Item
+              title="Administrator"
+              onPress={() => {
+                // setFormData({...formData, role: 'admin'});
+                setRole('admin');
+                setShowRoleMenu(false);
+              }}
+            />
+            <Menu.Item
+              title="Researcher"
+              onPress={() => {
+                // setFormData({...formData, role: 'researcher'});
+                setRole('researcher');
+                setShowRoleMenu(false);
+              }}
+            />
+            <Menu.Item
+              title="Viewer"
+              onPress={() => {
+                // setFormData({...formData, role: 'owner'});
+                setRole('viewer');
+                setShowRoleMenu(false);
+              }}
+            />
+          </Menu>
+
+          <Button 
+            mode="contained" 
+            onPress={handleSubmit}
+            style={styles.primaryButton}
+          >
+            Register User
+          </Button>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -183,8 +228,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 40, 
+    /* padding: 20,
+    paddingBottom: 40,  */
+    flexGrow: 1,
   },
   row: {
     flexDirection: 'row',
@@ -207,6 +253,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   primaryButton: {
+    marginVertical: 10,
     backgroundColor: '#2ecc71',
     borderRadius: 25,
     //paddingVertical: 4,
@@ -254,5 +301,5 @@ const styles = StyleSheet.create({
     //paddingVertical: 4,
     borderColor: '#333',
     // marginBottom: 5,
-  },
+  }
 });

@@ -1,33 +1,39 @@
-// app/(main)/_layout.tsx
-import { Redirect, Stack } from 'expo-router';
-import { useAuth } from '@/context/AuthContext'; 
-import TabsLayout from './(tabs)/_layout'; 
+import { useAuth } from '@/context/AuthContext';
+import { Stack, useRouter } from 'expo-router';
+import { useEffect } from 'react';
+import { View } from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
 
 export default function MainLayout() {
-  const isAuthenticated = true;
-  /* const { user, initialized } = useAuth();
+  const { user, initialized } = useAuth();
+  const router = useRouter();
 
-  if (!initialized) return null; // Or <LoadingScreen />
+  useEffect(() => {
+    if (!initialized) return;
 
-  // Redirect to auth if not logged in
-  if (!user) return <Redirect href="../(auth)/login" />;
+    if (user?.role !== 'researcher') {
+      router.replace('/login');
+    }
+  }, [initialized, user]);
 
-  // Redirect to admin if needed (optional)
-  if (user.role === 'admin') return <Redirect href="../(admin)/manage-users" />; */
+  if (!initialized) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#2ecc71" />
+      </View>
+    );
+  }
 
-  // Use your existing tabs layout
-  if (!isAuthenticated) {
-    return <Redirect href='/login'></Redirect>
+  if (user?.role !== 'researcher') {
+    return null;
   }
 
   return (
-    <>
-      <Stack>
-        <Stack.Screen name='(tabs)' options={{headerShown: false}}></Stack.Screen>
-        <Stack.Screen name='tree' options={{headerShown: false}}></Stack.Screen>
-        <Stack.Screen name='search' options={{headerShown: false}}></Stack.Screen>
-        <Stack.Screen name='camera' options={{headerShown: false, presentation: 'modal'}}></Stack.Screen>
-      </Stack>
-    </>
+    <Stack>
+      <Stack.Screen name='(tabs)' options={{headerShown: false}}></Stack.Screen>
+      <Stack.Screen name='tree' options={{headerShown: false}}></Stack.Screen>
+      <Stack.Screen name='search' options={{headerShown: false}}></Stack.Screen>
+      <Stack.Screen name='camera' options={{headerShown: false, presentation: 'modal'}}></Stack.Screen>
+    </Stack>
   );
 }

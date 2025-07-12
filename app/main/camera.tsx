@@ -1,19 +1,22 @@
-// app/camera.tsx
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { Image } from 'expo-image';
-import { useState, useRef } from 'react';
-import { StyleSheet, View, TouchableOpacity, Pressable, Modal, TextInput } from 'react-native';
-import { Button, Text } from 'react-native-paper'; 
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6"; 
-import * as ImagePicker from 'expo-image-picker'; 
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { Audio } from 'expo-av'; // Added for sound control
+import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
+import { useRef, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Button, Text } from 'react-native-paper';
+
+import { storage } from '@/firebaseConfig'; // Stop from here
+import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 
 export default function CameraScreen() {
   const [status, requestGalleryPermission] = ImagePicker.useMediaLibraryPermissions();
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions(); 
-  const ref = useRef<CameraView>(null); 
+  const cameraRef = useRef<CameraView>(null); 
   const [uri, setUri] = useState<string | null>(null);
   // New states for diameter calculation and profile selection
   const [isProfile, setIsProfile] = useState(false);
@@ -31,10 +34,56 @@ export default function CameraScreen() {
     </View>
   ); 
 
-  const handleSetProfile = () => {
+  const handleSetProfile = async () => {
     setIsProfile(!isProfile);
     // Here you would typically send to your backend/state management
     console.log('Image set as profile:', !isProfile);
+    if (!uri) return;
+
+    try {
+      // Read file as base64
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const response = fetch(uri);
+      const blob = await response.then(res => res.blob());
+      
+      // Convert to blob
+      // const blob = new Blob([base64], { type: 'image/jpeg' });
+      /* const blob = new Blob([Uint8Array.from(atob(base64), c => c.charCodeAt(0))], {
+        type: 'image/jpeg', // Explicit type
+      }); */
+      /* const byteCharacters = atob(base64);
+      const byteNumbers = Array.from(byteCharacters, char => char.charCodeAt(0));
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' }); */
+      
+      const fileName = uri.split('/').pop() || `image_${Date.now()}.jpeg`; // uri.substring(uri.lastIndexOf('/') + 1);
+      const storageRef = ref(storage, `images/${fileName}`);
+      console.log(storageRef);
+      
+      await uploadBytes(storageRef, blob, {
+        contentType: 'image/jpeg', // Explicit content type
+      });
+
+      console.log('Upload successful:', fileName);
+      return await getDownloadURL(storageRef);
+      // console.log('Upload success!', downloadURL);
+      
+      // Now use downloadURL to save to your database
+    } catch (error) {
+      console.error('Upload failed:', error);
+    }
+    /* const response = await fetch(uri ? uri : '');
+    const blob = await response.blob();
+
+    const fileName = uri?.substring(uri.lastIndexOf('/') + 1);
+    const storageRef = ref(storage, `images/${Date.now()}_${fileName}`);
+
+    await uploadBytes(storageRef, blob);
+    const downloadURL = await getDownloadURL(storageRef);
+    console.log('Image uploaded successfully:', downloadURL); */
   };
 
   const handleDiameterMeasurement = () => {
@@ -72,24 +121,35 @@ export default function CameraScreen() {
   const takePicture = async () => {
     /* const photo = await ref.current?.takePictureAsync();
     setUri(photo?.uri ?? null); */
-    try {
-      // Mute system sounds temporarily
-      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
-      const photo = await ref.current?.takePictureAsync();
+    /* try {
+      const photo = await cameraRef.current?.takePictureAsync();
       setUri(photo?.uri ?? null);
     } catch (error) {
       console.log('Error taking picture:', error);
-    } finally {
-      await Audio.setAudioModeAsync({ playsInSilentModeIOS: false });
+    } */
+   try {
+      const photo = await cameraRef.current?.takePictureAsync();
+      if (!photo?.uri) return;
+      
+      // Fix orientation and compress
+      const processed = await ImageManipulator.manipulateAsync(
+        photo.uri,
+        [{ resize: { width: 800 } }],
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      
+      setUri(processed.uri);
+    } catch (error) {
+      console.log('Error taking picture:', error);
     }
-  } 
+  };
 
   const renderCamera = () => {
     return (
       <View style={styles.cameraContainer}>
         <CameraView  
           style={styles.camera} 
-          ref={ref}
+          ref={cameraRef}
           facing={facing} 
           responsiveOrientationWhenOrientationLocked
         />

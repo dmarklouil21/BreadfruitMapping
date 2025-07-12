@@ -1,7 +1,7 @@
-import { StyleSheet, View, Pressable } from 'react-native';
-import { Card, Text } from 'react-native-paper';
-import { Link, useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Link, useRouter } from 'expo-router';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Card, Text } from 'react-native-paper';
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -19,8 +19,8 @@ export default function DashboardScreen() {
             <Card style={[styles.card, styles.primaryCard]}>
               <Card.Content>
                 <Text variant="titleMedium" style={styles.cardTitle}>
-                  <MaterialCommunityIcons name="shield-crown" size={20} color="#2ecc71" />
-                  {'  '}Administrators
+                  <MaterialCommunityIcons name="forest" size={20} color="#2ecc71" />
+                  {'  '}Trees Tracked
                 </Text>
                 <Text variant="displayMedium" style={styles.primaryStat}>1</Text>
               </Card.Content>
@@ -32,8 +32,8 @@ export default function DashboardScreen() {
           <Card style={styles.card}>
             <Card.Content>
               <Text variant="titleMedium" style={styles.cardTitle}>
-                <MaterialCommunityIcons name="flask" size={20} color="#2ecc71" />
-                {'  '}Researchers
+                <MaterialCommunityIcons name="account-group" size={20} color="#2ecc71" />
+                {'  '}All Users
               </Text>
               <Text variant="displayMedium" style={styles.primaryStat}>12</Text>
             </Card.Content>
@@ -44,8 +44,8 @@ export default function DashboardScreen() {
           <Card style={styles.card}>
             <Card.Content>
               <Text variant="titleMedium" style={styles.cardTitle}>
-                <MaterialCommunityIcons name="pine-tree" size={20} color="#2ecc71" />
-                {'  '}Tree Owners
+                <MaterialCommunityIcons name="account" size={20} color="#2ecc71" /> {/*pine-tree*/}
+                {'  '}Researchers
               </Text>
               <Text variant="displayMedium" style={styles.primaryStat}>31</Text>
             </Card.Content>

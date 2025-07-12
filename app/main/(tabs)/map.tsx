@@ -1,15 +1,13 @@
-// main/(tabs)/map.tsx
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useState, useEffect } from 'react';
-import { StyleSheet, View, Alert, Dimensions } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import { FAB, TextInput, Button, Text } from 'react-native-paper';
-import TreeDetailsModal from '@/components/TreeDetailsModal';
 import { useTreeData } from '@/hooks/useTreeData';
 import { Tree } from '@/types';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useAuth } from '@/context/AuthContext';
 import * as Location from 'expo-location';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, Dimensions, StyleSheet, View } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { Button, FAB, Text, TextInput } from 'react-native-paper';
+import TreeDetailsModal from '../tree/details/[treeID]';
 // import debounce from 'lodash.debounce';
 
 export default function MapScreen() {
@@ -29,7 +27,6 @@ export default function MapScreen() {
   } | null>(null);
 
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
-  const { user } = useAuth(); 
 
   useEffect(() => {
     if (params.lat && params.lng) {
@@ -50,7 +47,6 @@ export default function MapScreen() {
       Alert.alert('Error', 'Please enter a search term');
       return;
     }
-    console.log('Searching for:', searchQuery);
     // Implement geocoding or tree search here
     try{
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -115,14 +111,13 @@ export default function MapScreen() {
         />
       </View>
       <MapView
+        provider={PROVIDER_GOOGLE}
         style={styles.map}
         onLongPress={(e) => {
-          {user?.role === 'researcher' && (
-            setDroppedPin({
+          setDroppedPin({
             coordinate: e.nativeEvent.coordinate,
             title: 'New Tree',
           })
-          )}
         }}
         showsCompass={false}
         region={region} 
@@ -194,15 +189,13 @@ export default function MapScreen() {
           </View>
         </View>
       )}
-      {user?.role === 'researcher' && (
-        <FAB
+      <FAB
         icon="camera"
         style={styles.fab}
         color="white"
         customSize={56}
         onPress={() => router.push('../camera')}
-        />
-      )}
+      />
       <TreeDetailsModal
         visible={modalVisible}
         tree={selectedTree || undefined}

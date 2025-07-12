@@ -1,33 +1,36 @@
-// app/login.tsx
-import { Link, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Button, Text, TextInput } from 'react-native-paper';
 import { useAuth } from '@/context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Link, useRouter } from 'expo-router';
+import { useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { Button, Text, TextInput } from 'react-native-paper';
+
 
 export default function LoginScreen() {
   const { login } = useAuth();
   const router = useRouter();
-  const [username, setUsername] = useState(''); // Add username state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Implement authentication logic
-    login({
-      username: username,
-      email: email,
-      role: (username === 'admin' ? 'admin' : username === 'owner' ? 'viewer' : 'researcher'),
-      token: 'demo-token'
-    });
-
-    if (username === 'admin')
-      router.navigate('/admin/(tabs)');
-    else if(username === 'researcher')
-      router.navigate('/main/(tabs)');
-    else 
-      router.navigate('/main/(tabs)/map'); 
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError('Please enter both username and password');
+      return;
+    }
+    setLoading(true);
+    try {
+      const loggedInUser = await login(email, password);
+      if (loggedInUser?.status !== 'verified') {
+        alert('Your staff account is still pending for verification');
+        return;
+      }
+    } catch (e) {
+      alert('Invalid username or password');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,17 +43,23 @@ export default function LoginScreen() {
         />
       </View>
 
-      <Text variant="headlineMedium" style={styles.title}>KULO Login</Text>
-      
+      <Text variant="headlineMedium" style={styles.title}>
+        Breadfruit Tracker
+      </Text>
+
+      {error ? (
+        <Text style={styles.errorText}>{error}</Text>
+        ) : null}
+
       <TextInput
-        label="Email or Username"
-        value={username}
-        onChangeText={setUsername}
+        label="Email"
+        value={email}
+        onChangeText={setEmail}
         style={styles.input}
         autoCapitalize="none"
         left={<TextInput.Icon icon="email" />}
       />
-      
+
       <TextInput
         label="Password"
         value={password}
@@ -59,17 +68,22 @@ export default function LoginScreen() {
         style={styles.input}
         left={<TextInput.Icon icon="lock" />}
       />
-      
+
       <Button 
         mode="contained" 
         onPress={handleLogin} 
         style={styles.button}
         labelStyle={{ color: 'white' }}
-      >
-        Sign In
+        disabled={loading}
+      > 
+        {loading ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          'Sign In'
+        )}
       </Button>
-      
-      <Link href="/register" asChild>
+
+      <Link href="./register/user-type" asChild>
         <Button mode="text" textColor="#666">
           Don't have an account? Register
         </Button>
@@ -107,6 +121,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 12,
+    textAlign: 'center',
   },
 });
 

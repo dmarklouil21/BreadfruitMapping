@@ -1,12 +1,9 @@
-import { router, Tabs } from 'expo-router';
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import NotificationBell from '@/components/NotificationBell';
-import { useAuth } from '@/context/AuthContext';
-import { use } from 'react';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { router, Tabs } from 'expo-router';
 import { Pressable } from 'react-native';
 
 export default function TabsLayout() {
-  const { user } = useAuth(); 
   
   return (
     <Tabs
@@ -31,15 +28,10 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          href: user?.role === 'researcher' ? '/main/(tabs)' : null,
           title: 'Dashboard',
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="dashboard" size={24} color={color} />
           ),
-          /* tabBarButton: () => 
-            user?.role === 'researcher' ? (
-            <Tabs.Link href="/dashboard" />
-          ) : null */
         }}
       />
       <Tabs.Screen

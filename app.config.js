@@ -58,6 +58,7 @@ export default {
         }
       ],
       "expo-router",
+      "expo-web-browser",
       [
         "expo-splash-screen",
         {
@@ -76,7 +77,8 @@ export default {
       router: {},
       eas: {
         projectId: "48e90659-9b1a-4d79-b772-9c66a19ea58e"
-      }
+      }, 
+      FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
     },
     owner: "dmarklouil21"
   }
