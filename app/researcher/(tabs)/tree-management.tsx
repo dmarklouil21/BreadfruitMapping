@@ -5,17 +5,15 @@ import { useEffect, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { Card, FAB, Text } from 'react-native-paper';
 
-export default function AccountManagementScreen() {
+export default function TreeManagementScreen() {
   const router = useRouter();
-  const [allUsers, setAllUsers] = useState(0);
-  const [researchers, setResearchers] = useState(0);
+  const [allTrees, setAllTrees] = useState(0);
   const [pendings, setPendings] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
   const db = getFirestore();
-
+  
   const fetchAllCounts = async () => {
-
     const fetchCount = async (collectionName: string, filters: QueryConstraint[] = []) => {
       const baseCollection = collection(db, collectionName);
       const finalQuery = filters.length > 0 ? query(baseCollection, ...filters) : baseCollection;
@@ -24,18 +22,16 @@ export default function AccountManagementScreen() {
     };
 
     try {
-      setRefreshing(true)
-      const [allUsersCount, researchersCount, pendingCount] = await Promise.all([
-        fetchCount('users', [where('status', '==', 'verified')]),
-        fetchCount('users', [where('role', '==', 'researcher'), where('status', '==', 'verified')]),
-        fetchCount('users', [where('status', '==', 'pending')]),
+      setRefreshing(true);
+      const [allTreesCount, pendingCount] = await Promise.all([
+        fetchCount('trees', [where('status', '==', 'verified')]),
+        fetchCount('trees', [where('status', '==', 'pending')]),
       ]);
 
-      setAllUsers(allUsersCount);
-      setResearchers(researchersCount);
+      setAllTrees(allTreesCount);
       setPendings(pendingCount);
     } catch (error) {
-      console.error("Failed to fetch user counts:", error);
+      console.error("Failed to fetch tree counts:", error);
     } finally {
       setRefreshing(false);
     }
@@ -44,55 +40,41 @@ export default function AccountManagementScreen() {
   useEffect(() => {
     fetchAllCounts();
   }, []);
-
+  
   return (
     <ScrollView 
       contentContainerStyle={styles.container}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={fetchAllCounts} />
-      }
+      }  
     > 
       <Text variant="titleLarge" style={styles.title}>
-        <MaterialCommunityIcons name="account-group" size={24} color="#2ecc71" />
-        {'  '}Account Management
+        <MaterialCommunityIcons name="forest" size={24} color="#2ecc71" />
+        {'  '}Tree Management
       </Text>
 
       {/* Role Statistics Grid */}
       <View style={styles.gridContainer}>
-        <Link href={'/admin/user/user-list'} asChild>
+        <Link href={'/researcher/tree/tree-list'} asChild>
           <Pressable style={styles.gridItem}>
             <Card style={[styles.card, styles.primaryCard]}>
               <Card.Content>
                 <Text variant="titleMedium" style={styles.cardTitle}>
-                  <MaterialCommunityIcons name="account" size={20} color="#2ecc71" />
-                  {'  '}Researchers
+                  <MaterialCommunityIcons name="forest" size={20} color="#2ecc71" />
+                  {'  '}Trees Tracked
                 </Text>
-                <Text variant="displayMedium" style={styles.primaryStat}>{researchers}</Text>
+                <Text variant="displayMedium" style={styles.primaryStat}>{allTrees}</Text>
               </Card.Content>
             </Card>
           </Pressable>
         </Link>
 
-        <Link href={'/admin/user/user-list'} asChild>
+        <Link href={'/researcher/tree/pending-tree'} asChild>
           <Pressable style={styles.gridItem}>
             <Card style={styles.card}>
               <Card.Content>
                 <Text variant="titleMedium" style={styles.cardTitle}>
-                  <MaterialCommunityIcons name="account-group" size={20} color="#2ecc71" />
-                  {'  '}All Users
-                </Text>
-                <Text variant="displayMedium" style={styles.primaryStat}>{allUsers}</Text>
-              </Card.Content>
-            </Card>
-          </Pressable>
-        </Link>
-
-        <Link href={'/admin/user/pending'} asChild>
-          <Pressable style={styles.gridItem}>
-            <Card style={styles.card}>
-              <Card.Content>
-                <Text variant="titleMedium" style={styles.cardTitle}>
-                  <MaterialCommunityIcons name="account-clock" size={20} color="#2ecc71" />
+                  <MaterialCommunityIcons name="clock" size={20} color="#2ecc71" />
                   {'  '}Pending Approvals
                 </Text>
                 <Text variant="displayMedium" style={styles.primaryStat}>{pendings}</Text>
@@ -106,8 +88,9 @@ export default function AccountManagementScreen() {
         icon="plus"
         style={styles.fab}
         color="white"
-        onPress={() => router.push('/admin/user/add-user')} 
+        onPress={() => router.push('/researcher/tree/add-tree')} 
       />
+
     </ScrollView>
   );
 }

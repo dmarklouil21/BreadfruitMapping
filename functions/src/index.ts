@@ -18,6 +18,21 @@ interface NewUserRequest {
   joined: string;
 }
 
+interface NewTreeRequest {
+  city: string;
+  barangay: string;
+  diameter: number;
+  dateTracked: string;
+  fruitStatus: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  image?: string;
+  status: string;
+  trackedBy: string; 
+}
+
 export const createNewUser = functions.https.onCall(
   async (request: functions.https.CallableRequest<NewUserRequest>, context) => {
     const data = request.data;
@@ -38,6 +53,7 @@ export const createNewUser = functions.https.onCall(
       email: data.email,
       role: data.role,
       status: data.status,
+      image: data.image,
       joined: new Date().toISOString(),
     };
 
@@ -69,3 +85,57 @@ export const deleteUser = functions.https.onCall(
   }
 });
 
+export const addNewTree = functions.https.onCall(
+  async (request: functions.https.CallableRequest<NewTreeRequest>, context) => {
+  const data = request.data;
+
+  const year = new Date().getFullYear();
+  const prefix = `BFT-${year}`;
+
+  const db = admin.firestore();
+  const treeCollection = db.collection("trees");
+
+  const querySnapshot = await treeCollection
+    .where("treeID", ">=", prefix)
+    .where("treeID", "<=", `${prefix}-999999`)
+    .orderBy("treeID", "desc")
+    .limit(1)
+    .get();
+
+  let newSequence = 1;
+  if (!querySnapshot.empty) {
+    const lastTreeID = querySnapshot.docs[0].data().treeID;
+    const lastSeq = parseInt(lastTreeID.split("-")[2], 10);
+    newSequence = lastSeq + 1;
+  }
+
+  if (newSequence > 999999) {
+    throw new functions.https.HttpsError("resource-exhausted", "Maximum ID limit reached for the year.");
+  }
+
+  const treeID = `${prefix}-${newSequence.toString().padStart(6, "0")}`;
+
+  const treeData = {
+    treeID: treeID,
+    city: data.city,
+    barangay: data.barangay,
+    diameter: data.diameter,
+    dateTracked: data.dateTracked,
+    fruitStatus: data.fruitStatus,
+    coordinates: {
+      latitude: data.coordinates.latitude,
+      longitude: data.coordinates.longitude,
+    },
+    image: data.image,
+    status: data.status,
+    trackedBy: data.trackedBy,
+  };
+
+  try {
+    await treeCollection.doc(treeID).set(treeData);
+    return { success: true, treeID };
+  } catch (error) {
+    console.error("Error adding tree:", error);
+    throw new functions.https.HttpsError("internal", "Failed to add tree");
+  }
+});

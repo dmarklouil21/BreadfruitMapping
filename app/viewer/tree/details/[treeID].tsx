@@ -35,7 +35,7 @@ export default function TreeDetailsModal({ visible, tree, onClose }: {
           <Card style={styles.detailsCard}>
             <Card.Content>
               <Text variant="titleLarge" style={styles.title}>
-                Breadfruit Tree #{tree.id}
+                Breadfruit Tree #{tree.treeID}
               </Text>
 
               <View style={styles.detailRow}>
@@ -82,8 +82,8 @@ export default function TreeDetailsModal({ visible, tree, onClose }: {
           <View style={styles.buttonGroup}>
             <Link
               href={{
-                pathname: `/main/tree/process-fruit/${tree.id}`, 
-              }}
+                pathname: `/researcher/tree/process-fruit/${tree.treeID}`, 
+              } as any}
               asChild
             >
               <Button 
@@ -91,7 +91,7 @@ export default function TreeDetailsModal({ visible, tree, onClose }: {
                 style={styles.button}
                 // labelStyle={styles.buttonLabel}
               >
-                Send Attachment
+                Send Notification
               </Button>
             </Link>
             {/* {user?.role === 'researcher' ? (

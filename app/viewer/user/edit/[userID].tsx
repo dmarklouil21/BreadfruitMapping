@@ -19,7 +19,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { Button, Menu, Text, TextInput } from 'react-native-paper';
+import { Button, Text, TextInput } from 'react-native-paper';
 
 export default function EditTreeScreen() {
   const router = useRouter();
@@ -171,7 +171,7 @@ export default function EditTreeScreen() {
                 type={notificationType}
                 onClose={() => {
                   setNotificationVisible(false)
-                  router.push('/admin/(tabs)/account-management')
+                  router.push('/researcher/(tabs)/profile')
                 }}
               />
               <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
@@ -209,39 +209,14 @@ export default function EditTreeScreen() {
                 readOnly={true}
               />
 
-              <View style={{ marginBottom: 16 }}>
-                <Menu
-                  visible={showRoleMenu}
-                  onDismiss={() => setShowRoleMenu(false)}
-                  anchor={
-                    <TouchableOpacity onPress={() => setShowRoleMenu(true)}>
-                      <TextInput
-                        label="Role"
-                        value={role}
-                        editable={false}
-                        right={<TextInput.Icon icon="menu-down" />}
-                        style={{
-                          backgroundColor: '#f8f8f8',
-                          borderRadius: 8,
-                          borderWidth: 1,
-                          borderColor: '#eee',
-                        }}
-                      />
-                    </TouchableOpacity>
-                  }
-                >
-                  {USER_ROLE_OPTIONS.map(option => (
-                    <Menu.Item
-                      key={option}
-                      onPress={() => {
-                        setRole(option);
-                        setShowRoleMenu(false);
-                      }}
-                      title={option.charAt(0).toUpperCase() + option.slice(1)}
-                    />
-                  ))}
-                </Menu>
-              </View>
+              <TextInput
+                label="Role"
+                value={role}
+                onChangeText={setRole}
+                style={styles.input}
+                autoCapitalize="none"
+                readOnly
+              />
 
               <TextInput
                 label="Date Joined"

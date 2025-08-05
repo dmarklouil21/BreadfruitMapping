@@ -1,12 +1,63 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { collection, getCountFromServer, getFirestore, query, QueryConstraint, where } from "firebase/firestore";
+import { useEffect, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 
 export default function DashboardScreen() {
   const router = useRouter();
+
+  const [allTrees, setAllTrees] = useState(0);
+  const [allUsers, setAllUsers] = useState(0);
+  const [researcher, setResearchers] = useState(0);
+  const [pendingUser, setPendingUser] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const db = getFirestore();
+  
+  const fetchAllCounts = async () => {
+    const fetchCount = async (collectionName: string, filters: QueryConstraint[] = []) => {
+      const baseCollection = collection(db, collectionName);
+      const finalQuery = filters.length > 0 ? query(baseCollection, ...filters) : baseCollection;
+      const snapshot = await getCountFromServer(finalQuery);
+      return snapshot.data().count;
+    };
+
+    try {
+      setRefreshing(true);
+      const [allTreesCount, allUsersCount, researchersCount, pendingUsersCount] = await Promise.all([
+        fetchCount('trees', [where('status', '==', 'verified')]),
+        fetchCount('users', [where('status', '==', 'verified')]),
+        fetchCount('users', [
+          where('role', '==', 'researcher'),
+          where('status', '==', 'verified')
+        ]),
+        fetchCount('users', [where('status', '==', 'pending')]),
+      ]);
+
+      setAllTrees(allTreesCount);
+      setAllUsers(allUsersCount);
+      setResearchers(researchersCount);
+      setPendingUser(pendingUsersCount);
+    } catch (error) {
+      console.error("Failed to fetch tree counts:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllCounts();
+  }, []);
+
   return (
-    <View style={styles.container}> 
+    <ScrollView 
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={fetchAllCounts} />
+      }
+    > 
       <Text variant="titleLarge" style={styles.title}>
         <MaterialCommunityIcons name="view-dashboard" size={24} color="#2ecc71" />
         {'  '}Admin Dashboard
@@ -14,7 +65,7 @@ export default function DashboardScreen() {
 
       {/* Role Statistics Grid */}
       <View style={styles.gridContainer}>
-        <Link href={'/admin/(tabs)/user-list'} asChild>
+        <Link href={'/admin/tree/tree-list'} asChild>
           <Pressable style={styles.gridItem}>
             <Card style={[styles.card, styles.primaryCard]}>
               <Card.Content>
@@ -22,35 +73,45 @@ export default function DashboardScreen() {
                   <MaterialCommunityIcons name="forest" size={20} color="#2ecc71" />
                   {'  '}Trees Tracked
                 </Text>
-                <Text variant="displayMedium" style={styles.primaryStat}>1</Text>
+                <Text variant="displayMedium" style={styles.primaryStat}>{allTrees}</Text>
               </Card.Content>
             </Card>
           </Pressable>
         </Link>
 
-        <View style={styles.gridItem}>
-          <Card style={styles.card}>
-            <Card.Content>
-              <Text variant="titleMedium" style={styles.cardTitle}>
-                <MaterialCommunityIcons name="account-group" size={20} color="#2ecc71" />
-                {'  '}All Users
-              </Text>
-              <Text variant="displayMedium" style={styles.primaryStat}>12</Text>
-            </Card.Content>
-          </Card>
-        </View>
+        <Link href={'/admin/user/user-list'} asChild>
+          <Pressable style={styles.gridItem}>
+            <Card style={styles.card}>
+              <Card.Content>
+                <Text variant="titleMedium" style={styles.cardTitle}>
+                  <MaterialCommunityIcons name="account-group" size={20} color="#2ecc71" />
+                  {'  '}All Users
+                </Text>
+                <Text variant="displayMedium" style={styles.primaryStat}>{allUsers}</Text>
+              </Card.Content>
+            </Card>
+          </Pressable>
+        </Link>
 
-        <View style={styles.gridItem}>
-          <Card style={styles.card}>
-            <Card.Content>
-              <Text variant="titleMedium" style={styles.cardTitle}>
-                <MaterialCommunityIcons name="account" size={20} color="#2ecc71" /> {/*pine-tree*/}
-                {'  '}Researchers
-              </Text>
-              <Text variant="displayMedium" style={styles.primaryStat}>31</Text>
-            </Card.Content>
-          </Card>
-        </View>
+        <Link
+          href={{
+            pathname: '/admin/user/user-list',
+            params: { status: 'researcher' }
+          }}
+          asChild
+        >
+          <Pressable style={styles.gridItem}>
+            <Card style={styles.card}>
+              <Card.Content>
+                <Text variant="titleMedium" style={styles.cardTitle}>
+                  <MaterialCommunityIcons name="account" size={20} color="#2ecc71" /> {/*pine-tree*/}
+                  {'  '}Researchers
+                </Text>
+                <Text variant="displayMedium" style={styles.primaryStat}>{researcher}</Text>
+              </Card.Content>
+            </Card>
+          </Pressable>
+        </Link>
 
         <Link href={'/admin/user/pending'} asChild>
           <Pressable style={styles.gridItem}>
@@ -60,7 +121,7 @@ export default function DashboardScreen() {
                   <MaterialCommunityIcons name="account-clock" size={20} color="#2ecc71" />
                   {'  '}Pending Approvals
                 </Text>
-                <Text variant="displayMedium" style={styles.primaryStat}>15</Text>
+                <Text variant="displayMedium" style={styles.primaryStat}>{pendingUser}</Text>
               </Card.Content>
             </Card>
           </Pressable>
@@ -81,7 +142,7 @@ export default function DashboardScreen() {
           </Text>
         </Card.Content>
       </Card>
-    </View>
+    </ScrollView>
   );
 }
 

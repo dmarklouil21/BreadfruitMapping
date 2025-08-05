@@ -19,9 +19,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingAlert, NotificationAlert } from '@/components/NotificationModal';
 import barangayData from '@/constants/barangayData';
 import { useAuth } from '@/context/AuthContext';
-import { functions, storage } from '@/firebaseConfig';
+import { functions } from '@/firebaseConfig';
 import { Tree } from '@/types';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 
 const FRUIT_STATUS_OPTIONS = ['none', 'unripe', 'ripe'];
 
@@ -44,15 +43,15 @@ export default function AddTreeForm() {
   const [barangayOptionsMenuVisible, setBarangayOptionsMenuVisible] = useState(false);
 
   const [formData, setFormData] = useState<Tree>({
-    treeID: Math.random().toString(),
+    treeID: '',
     city: '',
     barangay: '',
     diameter: 0,
     coordinates: initialLocation,
     dateTracked: new Date().toISOString().split('T')[0],
     fruitStatus: 'none',
-    image: '',
-    status: 'verified',
+    image: image,
+    status: 'pending',
     trackedBy: user?.name || '',
   });
 
@@ -125,90 +124,20 @@ export default function AddTreeForm() {
     }
   };
 
+
   const handleSubmit = async () => {
     const addNewTree = httpsCallable(functions, 'addNewTree');
     setLoading(true);
-
     try {
-      let downloadURL = '';
-
-      if (image) {
-        // Get file name
-        const fileName = image.split('/').pop() || `image_${Date.now()}.jpeg`;
-
-        // Fetch blob from image URI
-        const res = await fetch(image);
-        const blob = await res.blob();
-
-        // Upload to Firebase Storage
-        const storageRef = ref(storage, `images/${fileName}`);
-        await uploadBytes(storageRef, blob, {
-          contentType: 'image/jpeg',
-        });
-
-        downloadURL = await getDownloadURL(storageRef);
-        console.log('Upload successful:', fileName);
-      }
-
-      // Prepare data for Firestore
-      const treeData = {
-        ...formData,
-        image: downloadURL,
-        diameter: parseFloat(diameterInput) || 0,
-        coordinates: {
-          latitude: parseFloat(latitudeInput) || 0,
-          longitude: parseFloat(longitudeInput) || 0,
-        },
-      };
-
-      await addNewTree(treeData);
-
-      setNotificationMessage('Added successfully');
-      setNotificationType('success');
-      setNotificationVisible(true);
-    } catch (error) {
-      console.error('Error adding tree:', error);
-      setNotificationMessage('Failed to add tree data.');
-      setNotificationType('error');
-      setNotificationVisible(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  /* const handleSubmit = async () => {
-    const addNewTree = httpsCallable(functions, 'addNewTree');
-    setLoading(true);
-
-    try {
-      const base64 = await FileSystem.readAsStringAsync(image, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      const response = fetch(image);
-      const blob = await response.then(res => res.blob());
-
-      const fileName = image.split('/').pop() || `image_${Date.now()}.jpeg`; 
-      const storageRef = ref(storage, `images/${fileName}`);
-      console.log(storageRef);
-      
-      await uploadBytes(storageRef, blob, {
-        contentType: 'image/jpeg', // Explicit content type
-      });
-
-      console.log('Upload successful:', fileName);
-      const downloadURL = await getDownloadURL(storageRef);
-
       const result = await addNewTree ({
         ...formData, 
-        image: downloadURL,
         diameter: parseFloat(diameterInput) || 0,
         coordinates: {
           latitude: parseFloat(latitudeInput) || 0,
           longitude: parseFloat(longitudeInput) || 0,
         }
       });
+      
       setNotificationMessage('Added successfully');
       setNotificationType('success');
       setNotificationVisible(true);
@@ -220,7 +149,7 @@ export default function AddTreeForm() {
     } finally {
       setLoading(false);
     }
-  }; */
+  };
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>

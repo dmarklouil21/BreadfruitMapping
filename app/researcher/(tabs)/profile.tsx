@@ -1,9 +1,11 @@
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'expo-router';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Avatar, Button, Text } from 'react-native-paper';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   const getInitials = () => {
     if (!user?.name) return 'GU';
@@ -27,13 +29,21 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <Avatar.Text 
-        size={80} 
-        label={getInitials()} 
-        style={styles.avatar}
-        color="#ffffff"
-        theme={{ colors: { primary: '#2ecc71' } }}
-      />
+      {user?.image ? (
+        <Avatar.Image 
+          size={80} 
+          source={{ uri: user.image }} 
+          style={styles.avatar}
+        />
+      ) : (
+        <Avatar.Text 
+          size={80} 
+          label={getInitials()} 
+          style={styles.avatar}
+          color="#ffffff"
+          theme={{ colors: { primary: '#2ecc71' } }}
+        />
+      )}
       
       <Text variant="titleLarge" style={styles.name}>
         {user?.name || 'Guest User'}
@@ -45,11 +55,11 @@ export default function ProfileScreen() {
 
       <Button 
         mode="contained" 
-        onPress={handleLogout}
+        onPress={() => router.navigate(`../user/edit/${user?.uid}`)}
         style={styles.button}
-        icon="logout"
+        icon="account-edit"
       >
-        Logout
+        Edit Profile
       </Button>
 
       <View style={styles.section}>
@@ -85,10 +95,21 @@ export default function ProfileScreen() {
         <Button 
           mode="text"
           style={styles.settingButton}
-          icon="history"
+          icon="tag"
           textColor="#333"
+          onPress={() => router.navigate('../tree/user/tracked-trees')}
         >
-          Track History
+          Tracked Trees
+        </Button>
+
+        <Button 
+          mode="text"
+          style={styles.settingButton}
+          icon="logout"
+          textColor="#333"
+          onPress={handleLogout}
+        >
+          Logout
         </Button>
       </View>
     </View>

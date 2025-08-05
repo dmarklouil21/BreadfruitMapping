@@ -125,7 +125,7 @@ export default function MapScreen() {
       >
         {(trees || []).map((tree) => (
           <Marker
-            key={tree.id}
+            key={tree.treeID}
             coordinate={tree.coordinates}
             onPress={() => {
               setSelectedTree(tree);

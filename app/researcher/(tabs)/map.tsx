@@ -6,12 +6,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Dimensions, StyleSheet, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { Button, FAB, Text, TextInput } from 'react-native-paper';
+import { Button, Text, TextInput } from 'react-native-paper';
 import TreeDetailsModal from '../tree/details/[treeID]';
 // import debounce from 'lodash.debounce';
 
 export default function MapScreen() {
-  const { trees } = useTreeData();
+  const { trees, isLoading, error } = useTreeData();
   const params = useLocalSearchParams();
   const { width, height } = Dimensions.get('window');
   const [region, setRegion] = useState({
@@ -130,7 +130,7 @@ export default function MapScreen() {
       >
         {(trees || []).map((tree) => (
           <Marker
-            key={tree.id}
+            key={tree.treeID}
             coordinate={tree.coordinates}
             onPress={() => {
               setSelectedTree(tree);
@@ -189,13 +189,13 @@ export default function MapScreen() {
           </View>
         </View>
       )}
-      <FAB
+      {/* <FAB
         icon="camera"
         style={styles.fab}
         color="white"
         customSize={56}
         onPress={() => router.push('../camera')}
-      />
+      /> */}
       <TreeDetailsModal
         visible={modalVisible}
         tree={selectedTree || undefined}

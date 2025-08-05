@@ -1,4 +1,3 @@
-// app/main/search.tsx
 import { useTreeData } from '@/hooks/useTreeData';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';

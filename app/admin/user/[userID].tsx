@@ -6,7 +6,7 @@ import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { useState } from "react";
-import { Alert, Image, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Card, Text } from 'react-native-paper';
 
 
@@ -139,19 +139,27 @@ export default function UserProfileScreen() {
               </Text>
             </View>
 
-            <View style={styles.detailItem}>
-                <MaterialCommunityIcons name="calendar" size={20} color="#2ecc71" />
-                <Text style={styles.detailText}>
-                  {user.status === 'pending' ? 'Requested:' : 'Joined:'} {new Date(user.joined).toLocaleDateString()}
-                </Text>
-            </View>
+            <Pressable 
+              style={styles.detailItem} 
+              onPress={() => router.navigate({
+                  pathname: '../tree/user/tracked-trees',
+                  params: {trackedBy: user?.name},
+                })
+              }
+            >
+              <MaterialCommunityIcons name="tag" size={20} color="#2ecc71" />
+              <Text style={styles.detailText}>
+                Tracked Trees
+              </Text>
+            </Pressable>
 
             <View style={styles.detailItem}>
-                <MaterialCommunityIcons name="history" size={20} color="#2ecc71" />
-                <Text style={styles.detailText}>
-                  Activity Log 
-                </Text>
+              <MaterialCommunityIcons name="calendar" size={20} color="#2ecc71" />
+              <Text style={styles.detailText}>
+                {user.status === 'pending' ? 'Requested:' : 'Joined:'} {new Date(user.joined).toLocaleDateString()}
+              </Text>
             </View>
+
           </Card.Content>
         </Card>
 
@@ -178,7 +186,7 @@ export default function UserProfileScreen() {
           <View style={styles.buttonGroup}>
             <Link href={{
               pathname: `/admin/user/edit/${user.uid}`,
-            }} 
+            } as any} 
             asChild
             >
               <Button 

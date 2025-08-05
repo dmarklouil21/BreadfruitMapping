@@ -1,9 +1,11 @@
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'expo-router';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Avatar, Button, Text } from 'react-native-paper';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   // Get initials for avatar
   const getInitials = () => {
@@ -14,8 +16,6 @@ export default function ProfileScreen() {
 
   // Handle logout
   const handleLogout = async () => {
-    // await logout();
-    // router.replace('/login');
     Alert.alert('Confirm Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -30,13 +30,28 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <Avatar.Text 
+      {user?.image ? (
+        <Avatar.Image 
+          size={80} 
+          source={{ uri: user.image }} 
+          style={styles.avatar}
+        />
+      ) : (
+        <Avatar.Text 
+          size={80} 
+          label={getInitials()} 
+          style={styles.avatar}
+          color="#ffffff"
+          theme={{ colors: { primary: '#2ecc71' } }}
+        />
+      )}
+      {/* <Avatar.Text 
         size={80} 
         label={getInitials()} 
         style={styles.avatar}
         color="#ffffff"
         theme={{ colors: { primary: '#2ecc71' } }}
-      />
+      /> */}
       
       <Text variant="titleLarge" style={styles.name}>
         {user?.name || 'Guest User'}
@@ -48,12 +63,11 @@ export default function ProfileScreen() {
 
       <Button 
         mode="contained" 
-        onPress={handleLogout}
+        onPress={() => router.navigate(`../user/edit/${user?.uid}`)}
         style={styles.button}
-        //labelStyle={styles.buttonLabel}
-        icon="logout"
+        icon="account-edit"
       >
-        Logout
+        Edit Profile
       </Button>
 
       <View style={styles.section}>
@@ -86,13 +100,23 @@ export default function ProfileScreen() {
           Appearance
         </Button>
 
-        <Button 
+        {/* <Button 
           mode="text"
           style={styles.settingButton}
           icon="history"
           textColor="#333"
         >
           Track History
+        </Button> */}
+
+        <Button 
+          mode="text"
+          style={styles.settingButton}
+          icon="logout"
+          textColor="#333"
+          onPress={handleLogout}
+        >
+          Logout
         </Button>
       </View>
     </View>

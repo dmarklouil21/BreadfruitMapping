@@ -4,7 +4,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
-import { Chip, Text } from 'react-native-paper';
+import { Chip, FAB, Text } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const TreeFilter = ({ selected, onSelect }: { 
@@ -69,7 +70,7 @@ export default function TreeListScreen() {
   if (error) return <ErrorView message={error} />;
 
   return (
-    // <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <TreeFilter selected={selectedStatus} onSelect={setSelectedStatus} />
 
@@ -86,14 +87,14 @@ export default function TreeListScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
         />
-        {/* <FAB
+        <FAB
           icon="filter"
           style={styles.fab}
           color="white"
           onPress={() => router.push('../tree/add-tree')} 
-        /> */}
+        />
       </View>
-    // </SafeAreaView>
+    </SafeAreaView>
   );
 }
 

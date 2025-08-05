@@ -33,7 +33,7 @@ export default function TreeDetailsModal({ visible, tree, onClose }: {
           <Card style={styles.detailsCard}>
             <Card.Content>
               <Text variant="titleLarge" style={styles.title}>
-                Breadfruit Tree #{tree.id}
+                {tree.treeID}
               </Text>
 
               <View style={styles.detailRow}>
@@ -80,8 +80,8 @@ export default function TreeDetailsModal({ visible, tree, onClose }: {
           <View style={styles.buttonGroup}>
             <Link
               href={{
-                pathname: `/main/tree/edit/${tree.id}`,
-              }}
+                pathname: `/researcher/tree/edit/${tree.treeID}`,
+              } as any}
               asChild
             >
               <Button 

@@ -32,6 +32,7 @@ export default function MainLayout() {
     <Stack>
       <Stack.Screen name='(tabs)' options={{headerShown: false}}></Stack.Screen>
       <Stack.Screen name='tree' options={{headerShown: false}}></Stack.Screen>
+      <Stack.Screen name='user' options={{headerShown: false}}></Stack.Screen>
       <Stack.Screen name='search' options={{headerShown: false}}></Stack.Screen>
     </Stack>
   );

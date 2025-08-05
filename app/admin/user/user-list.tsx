@@ -1,7 +1,7 @@
 import UserCard from '@/components/UserCard';
 import { useUserData } from '@/hooks/useUserData';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Chip, Text } from 'react-native-paper';
@@ -35,6 +35,7 @@ const RoleFilter = ({ selected, onSelect }: {
 };
 
 export default function UserListScreen() {
+  const { status } = useLocalSearchParams();
   const { users, error, isLoading } = useUserData({ 
     mode: 'criteria',
     field: 'status',
@@ -43,7 +44,7 @@ export default function UserListScreen() {
   }); 
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRole, setSelectedRole] = useState('All');
+  const [selectedRole, setSelectedRole] = useState(status?.toString() || 'All');
   const router = useRouter();
 
   const filteredUsers = useMemo(() => {

@@ -1,5 +1,5 @@
-import { View, StyleSheet, Button } from 'react-native';
 import { Link, Stack, useRouter } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
 export default function NotFound() {
     const router = useRouter();
@@ -7,7 +7,7 @@ export default function NotFound() {
         <>
             <Stack.Screen options={{ title: 'Oops! Not Found' }} />
             <View style={styles.container}>
-                <Link href={'/main/(tabs)'} style={styles.button}>
+                <Link href={'/researcher/(tabs)'} style={styles.button}>
                     Go back to home screen!
                 </Link>
                 {/* <Button title='Go back' onPress={router.navigate('/main/(tabs)')}/> */}

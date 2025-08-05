@@ -23,6 +23,8 @@ import {
 import { Button, Menu, Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const FRUIT_STATUS_OPTIONS = ['none', 'unripe', 'ripe'];
+
 export default function EditTreeScreen() {
   const router = useRouter();
   const { treeID } = useLocalSearchParams();
@@ -45,7 +47,6 @@ export default function EditTreeScreen() {
   const [cityOptionsMenuVisible, setCityOptionsMenuVisible] = useState(false);
   const [barangayOptionsMenuVisible, setBarangayOptionsMenuVisible] = useState(false);
 
-  const FRUIT_STATUS_OPTIONS = ['none', 'unripe', 'ripe'];
   const CITY_OPTIONS = Object.keys(barangayData)
   const BARANGAY_OPTIONS = barangayData[city] || [];
 
@@ -55,6 +56,7 @@ export default function EditTreeScreen() {
       setFruitStatus(tree.fruitStatus);
       setBarangay(tree.barangay);
       setDiameter(tree.diameter.toString());
+      // setDiameter(tree.diameter !== undefined && tree.diameter !== null ? tree.diameter.toString() : '');
       setLatitudeInput(tree.coordinates.latitude.toString());
       setLongitudeInput(tree.coordinates.longitude.toString());
       setImage(tree.image || '');
@@ -99,7 +101,7 @@ export default function EditTreeScreen() {
 
             let downloadURL = '';
             let previousImageURL = tree.image;
-            
+
             if (image) {
               // Get file name
               const fileName = image.split('/').pop() || `image_${Date.now()}.jpeg`;
@@ -144,6 +146,18 @@ export default function EditTreeScreen() {
             }
 
             await updateDoc(docRef, treeData);
+            
+           /*  await updateDoc(docRef, {
+              city: city,
+              barangay: barangay,
+              fruitStatus: fruitStatus,
+              diameter: parseFloat(diameter) || 0,
+              coordinates: {
+                latitude: parseFloat(latitudeInput) || 0,
+                longitude: parseFloat(longitudeInput) || 0,
+              },
+              image: image,
+            }); */
 
             setNotificationVisible(true);
             setNotificationMessage('Successfully saved.');
@@ -202,196 +216,196 @@ export default function EditTreeScreen() {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps='handled'>
-          <View style={styles.container}>
-            <LoadingAlert visible={loading} message="Please wait..." />
-            <NotificationAlert
-              visible={notificationVisible}
-              message={notificationMessage}
-              type={notificationType}
-              onClose={() => {
-                setNotificationVisible(false)
-                router.navigate('/admin/(tabs)/tree-management')
-              }}
-            />
-            <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
-              {image ? (
-                <ReactImage source={{ uri: image }} style={styles.image} />
-              ) : (
-                <View style={styles.imagePlaceholder}>
-                  <MaterialIcons name="add-a-photo" size={40} color="#2ecc71" />
-                  <Text style={styles.imageLabel}>Update Tree Picture</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-
-            <TextInput
-              label="Breadfruit ID"
-              value={tree?.treeID}
-              style={styles.input}
-              readOnly={true}
-            />
-
-            <View style={{ marginBottom: 16 }}>
-              <Menu
-                visible={cityOptionsMenuVisible}
-                onDismiss={() => setCityOptionsMenuVisible(false)}
-                anchor={
-                  <TouchableOpacity onPress={() => setCityOptionsMenuVisible(true)}>
-                    <TextInput
-                      label="City/Municipality"
-                      value={city}
-                      editable={false}
-                      right={<TextInput.Icon icon="menu-down" />}
-                      style={{
-                        backgroundColor: '#f8f8f8',
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        borderColor: '#eee',
-                      }}
-                    />
-                  </TouchableOpacity>
-                }
-              >
-                {CITY_OPTIONS.map(option => (
-                  <Menu.Item
-                    key={option}
-                    onPress={() => {
-                      setCity(option);
-                      setCityOptionsMenuVisible(false);
-                    }}
-                    title={option.charAt(0).toUpperCase() + option.slice(1)}
-                  />
-                ))}
-              </Menu>
-            </View>
-
-            <View style={{ marginBottom: 16 }}>
-              <Menu
-                visible={barangayOptionsMenuVisible}
-                onDismiss={() => setBarangayOptionsMenuVisible(false)}
-                anchor={
-                  <TouchableOpacity onPress={() => setBarangayOptionsMenuVisible(true)}>
-                    <TextInput
-                      label="Bogo"
-                      value={barangay}
-                      editable={false}
-                      right={<TextInput.Icon icon="menu-down" />}
-                      style={{
-                        backgroundColor: '#f8f8f8',
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        borderColor: '#eee',
-                      }}
-                    />
-                  </TouchableOpacity>
-                }
-              >
-                {BARANGAY_OPTIONS.map(option => (
-                  <Menu.Item
-                    key={option}
-                    onPress={() => {
-                      setBarangay(option);
-                      setBarangayOptionsMenuVisible(false);
-                    }}
-                    title={option.charAt(0).toUpperCase() + option.slice(1)}
-                  />
-                ))}
-              </Menu>
-            </View>
-
-            <View style={{ marginBottom: 16 }}>
-              <Menu
-                visible={showStatusMenu}
-                onDismiss={() => setShowStatusMenu(false)}
-                anchor={
-                  <TouchableOpacity onPress={() => setShowStatusMenu(true)}>
-                    <TextInput
-                      label="Fruit Status"
-                      value={fruitStatus}
-                      editable={false}
-                      right={<TextInput.Icon icon="menu-down" />}
-                      style={{
-                        backgroundColor: '#f8f8f8',
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        borderColor: '#eee',
-                      }}
-                    />
-                  </TouchableOpacity>
-                }
-              >
-                {FRUIT_STATUS_OPTIONS.map(option => (
-                  <Menu.Item
-                    key={option}
-                    onPress={() => {
-                      setFruitStatus(option);
-                      setShowStatusMenu(false);
-                    }}
-                    title={option.charAt(0).toUpperCase() + option.slice(1)}
-                  />
-                ))}
-              </Menu>
-            </View>
-
-            <TextInput
-              label="Diameter"
-              value={diameter}
-              onChangeText={setDiameter}
-              style={styles.input}
-              keyboardType="decimal-pad"
-            />
-
-            <View style={styles.coordinateGroup}>
-              <View style={styles.coordinateLegend}>
-                <Text style={styles.legendText}>Coordinates</Text>
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps='handled'>
+        <View style={styles.container}>
+          <LoadingAlert visible={loading} message="Please wait..." />
+          <NotificationAlert
+            visible={notificationVisible}
+            message={notificationMessage}
+            type={notificationType}
+            onClose={() => {
+              setNotificationVisible(false)
+              router.navigate('/researcher/(tabs)/map')
+            }}
+          />
+          <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+            {image ? (
+              <ReactImage source={{ uri: image }} style={styles.image} />
+            ) : (
+              <View style={styles.imagePlaceholder}>
+                <MaterialIcons name="add-a-photo" size={40} color="#2ecc71" />
+                <Text style={styles.imageLabel}>Update Tree Picture</Text>
               </View>
-              <View style={styles.rowLegend}>
-                <TextInput
-                  label="Latitude"
-                  value={latitudeInput}
-                  onChangeText={setLatitudeInput}
-                  style={[styles.input, styles.halfWidth, styles.coordinateInput]}
-                  keyboardType="decimal-pad"
-                />
-                <TextInput
-                  label="Longitude"
-                  value={longitudeInput}
-                  onChangeText={setLongitudeInput}
-                  style={[styles.input, styles.halfWidth, styles.coordinateInput]}
-                  keyboardType="decimal-pad"
-                />
-              </View>
-              <TouchableOpacity onPress={getCurrentLocation}>
-                <Text style={styles.useLocationText}>Use Location</Text>
-              </TouchableOpacity>
-            </View>
+            )}
+          </TouchableOpacity>
 
-            <TextInput
-              label="Date Tracked"
-              value={tree?.dateTracked}
-              style={styles.input}
-              readOnly={true}
-            />
+          <TextInput
+            label="Breadfruit ID"
+            value={tree?.treeID}
+            style={styles.input}
+            readOnly={true}
+          />
 
-            <View style={styles.buttonGroup}>
-              <Button 
-                mode="contained" 
-                onPress={() => handleSubmit(treeID.toString())}
-                style={styles.primaryButton}
-              >
-                Save Changes
-              </Button>
-              <Button
-                mode="contained"
-                onPress={() => console.log('Image processing in progress:')}
-                style={styles.secondaryButton}
-              >
-                Image Processing
-              </Button>
-            </View>
+          <View style={{ marginBottom: 16 }}>
+            <Menu
+              visible={cityOptionsMenuVisible}
+              onDismiss={() => setCityOptionsMenuVisible(false)}
+              anchor={
+                <TouchableOpacity onPress={() => setCityOptionsMenuVisible(true)}>
+                  <TextInput
+                    label="City/Municipality"
+                    value={city}
+                    editable={false}
+                    right={<TextInput.Icon icon="menu-down" />}
+                    style={{
+                      backgroundColor: '#f8f8f8',
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: '#eee',
+                    }}
+                  />
+                </TouchableOpacity>
+              }
+            >
+              {CITY_OPTIONS.map(option => (
+                <Menu.Item
+                  key={option}
+                  onPress={() => {
+                    setCity(option);
+                    setCityOptionsMenuVisible(false);
+                  }}
+                  title={option.charAt(0).toUpperCase() + option.slice(1)}
+                />
+              ))}
+            </Menu>
           </View>
-        </ScrollView>
+
+          <View style={{ marginBottom: 16 }}>
+            <Menu
+              visible={barangayOptionsMenuVisible}
+              onDismiss={() => setBarangayOptionsMenuVisible(false)}
+              anchor={
+                <TouchableOpacity onPress={() => setBarangayOptionsMenuVisible(true)}>
+                  <TextInput
+                    label="Bogo"
+                    value={barangay}
+                    editable={false}
+                    right={<TextInput.Icon icon="menu-down" />}
+                    style={{
+                      backgroundColor: '#f8f8f8',
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: '#eee',
+                    }}
+                  />
+                </TouchableOpacity>
+              }
+            >
+              {BARANGAY_OPTIONS.map(option => (
+                <Menu.Item
+                  key={option}
+                  onPress={() => {
+                    setBarangay(option);
+                    setBarangayOptionsMenuVisible(false);
+                  }}
+                  title={option.charAt(0).toUpperCase() + option.slice(1)}
+                />
+              ))}
+            </Menu>
+          </View>
+
+          <View style={{ marginBottom: 16 }}>
+            <Menu
+              visible={showStatusMenu}
+              onDismiss={() => setShowStatusMenu(false)}
+              anchor={
+                <TouchableOpacity onPress={() => setShowStatusMenu(true)}>
+                  <TextInput
+                    label="Fruit Status"
+                    value={fruitStatus}
+                    editable={false}
+                    right={<TextInput.Icon icon="menu-down" />}
+                    style={{
+                      backgroundColor: '#f8f8f8',
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: '#eee',
+                    }}
+                  />
+                </TouchableOpacity>
+              }
+            >
+              {FRUIT_STATUS_OPTIONS.map(option => (
+                <Menu.Item
+                  key={option}
+                  onPress={() => {
+                    setFruitStatus(option);
+                    setShowStatusMenu(false);
+                  }}
+                  title={option.charAt(0).toUpperCase() + option.slice(1)}
+                />
+              ))}
+            </Menu>
+          </View>
+
+          <TextInput
+            label="Diameter"
+            value={diameter}
+            onChangeText={setDiameter}
+            style={styles.input}
+            keyboardType="decimal-pad"
+          />
+
+          <View style={styles.coordinateGroup}>
+            <View style={styles.coordinateLegend}>
+              <Text style={styles.legendText}>Coordinates</Text>
+            </View>
+            <View style={styles.rowLegend}>
+              <TextInput
+                label="Latitude"
+                value={latitudeInput}
+                onChangeText={setLatitudeInput}
+                style={[styles.input, styles.halfWidth, styles.coordinateInput]}
+                keyboardType="decimal-pad"
+              />
+              <TextInput
+                label="Longitude"
+                value={longitudeInput}
+                onChangeText={setLongitudeInput}
+                style={[styles.input, styles.halfWidth, styles.coordinateInput]}
+                keyboardType="decimal-pad"
+              />
+            </View>
+            <TouchableOpacity onPress={getCurrentLocation}>
+              <Text style={styles.useLocationText}>Use Location</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TextInput
+            label="Date Tracked"
+            value={tree?.dateTracked}
+            style={styles.input}
+            readOnly={true}
+          />
+
+          <View style={styles.buttonGroup}>
+            <Button 
+              mode="contained" 
+              onPress={() => handleSubmit(treeID.toString())}
+              style={styles.primaryButton}
+            >
+              Save Changes
+            </Button>
+            <Button
+              mode="contained"
+              onPress={() => console.log('Image processing in progress:')}
+              style={styles.secondaryButton}
+            >
+              Image Processing
+            </Button>
+          </View>
+        </View>
+      </ScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>
   );

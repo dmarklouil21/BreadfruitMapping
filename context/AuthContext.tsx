@@ -43,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: data.email,
             role: data.role,
             status: data.status,
+            image: data.image,
             joined: data.joined,
           };
           return userData;

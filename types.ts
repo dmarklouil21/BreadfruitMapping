@@ -9,18 +9,21 @@ export type User = {
 };
 
 export type Tree = {
-  id: string;
+  treeID: string;
   city: string;
+  barangay: string;
   diameter: number;
   dateTracked: string;
-  fruitStatus?: 'ripe' | 'unripe' | 'none';
+  fruitStatus: 'ripe' | 'unripe' | 'none';
   coordinates: {
     latitude: number;
     longitude: number;
   };
   image?: string;
+  status: string;
+  trackedBy: string; 
 };
-  
+
 export type AuthContextType = {
   user: User | null;
   login: (email: string, password: string) => Promise<User | null>;

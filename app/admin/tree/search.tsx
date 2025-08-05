@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Card, Text, TextInput } from 'react-native-paper';
 
+
 export default function SearchScreen() {
   const { trees } = useTreeData();
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,7 +17,7 @@ export default function SearchScreen() {
   const filteredTrees = useMemo(() => {
     return trees.filter(tree => 
       tree.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tree.id.toString().includes(searchQuery)
+      tree.treeID.toString().includes(searchQuery)
     );
   }, [searchQuery]);
 
@@ -53,12 +54,12 @@ export default function SearchScreen() {
 
       <FlatList
         data={filteredTrees}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.treeID}
         renderItem={({ item }) => (
           <Card 
             style={styles.card}
             onPress={() => router.push({
-              pathname: './(tabs)/map',
+              pathname: `./details/${item.treeID}`,
               params: {
                 lat: item.coordinates.latitude,
                 lng: item.coordinates.longitude
@@ -68,7 +69,7 @@ export default function SearchScreen() {
             <Card.Content>
               <Text style={styles.treeIdText}>
                 <MaterialCommunityIcons name="tree" size={16} color="#2ecc71" />
-                {'  '}Tree #{item.id}
+                {'  '}{item.treeID}
               </Text>
               <Text style={styles.location}>
                 <MaterialCommunityIcons name="map-marker" size={14} color="#666" />

@@ -1,12 +1,53 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { collection, getCountFromServer, getFirestore, query, QueryConstraint, where } from "firebase/firestore";
+import { useEffect, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { Card, FAB, Text } from 'react-native-paper';
 
 export default function TreeManagementScreen() {
   const router = useRouter();
+  const [allTrees, setAllTrees] = useState(0);
+  const [pendings, setPendings] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const db = getFirestore();
+  
+  const fetchAllCounts = async () => {
+    const fetchCount = async (collectionName: string, filters: QueryConstraint[] = []) => {
+      const baseCollection = collection(db, collectionName);
+      const finalQuery = filters.length > 0 ? query(baseCollection, ...filters) : baseCollection;
+      const snapshot = await getCountFromServer(finalQuery);
+      return snapshot.data().count;
+    };
+
+    try {
+      setRefreshing(true);
+      const [allTreesCount, pendingCount] = await Promise.all([
+        fetchCount('trees', [where('status', '==', 'verified')]),
+        fetchCount('trees', [where('status', '==', 'pending')]),
+      ]);
+
+      setAllTrees(allTreesCount);
+      setPendings(pendingCount);
+    } catch (error) {
+      console.error("Failed to fetch tree counts:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllCounts();
+  }, []);
+  
   return (
-    <View style={styles.container}> 
+    <ScrollView 
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={fetchAllCounts} />
+      }  
+    > 
       <Text variant="titleLarge" style={styles.title}>
         <MaterialCommunityIcons name="forest" size={24} color="#2ecc71" />
         {'  '}Tree Management
@@ -22,13 +63,13 @@ export default function TreeManagementScreen() {
                   <MaterialCommunityIcons name="forest" size={20} color="#2ecc71" />
                   {'  '}Trees Tracked
                 </Text>
-                <Text variant="displayMedium" style={styles.primaryStat}>1</Text>
+                <Text variant="displayMedium" style={styles.primaryStat}>{allTrees}</Text>
               </Card.Content>
             </Card>
           </Pressable>
         </Link>
 
-        <Link href={'/admin/user/pending'} asChild>
+        <Link href={'/admin/tree/pending-tree'} asChild>
           <Pressable style={styles.gridItem}>
             <Card style={styles.card}>
               <Card.Content>
@@ -36,7 +77,7 @@ export default function TreeManagementScreen() {
                   <MaterialCommunityIcons name="clock" size={20} color="#2ecc71" />
                   {'  '}Pending Approvals
                 </Text>
-                <Text variant="displayMedium" style={styles.primaryStat}>15</Text>
+                <Text variant="displayMedium" style={styles.primaryStat}>{pendings}</Text>
               </Card.Content>
             </Card>
           </Pressable>
@@ -50,7 +91,7 @@ export default function TreeManagementScreen() {
         onPress={() => router.push('/admin/tree/add-tree')} 
       />
 
-    </View>
+    </ScrollView>
   );
 }
 

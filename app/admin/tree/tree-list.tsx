@@ -76,8 +76,8 @@ export default function TreeListScreen() {
 
         <FlatList
           data={filteredTrees}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => <TreeCard tree={item} />}
+          keyExtractor={item => item.treeID}
+          renderItem={({ item }) => <TreeCard tree={item} stringPath={`./details/${item.treeID}`}/>}
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <MaterialCommunityIcons name="tree" size={40} color="#888" />

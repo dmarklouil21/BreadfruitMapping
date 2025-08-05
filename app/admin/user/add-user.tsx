@@ -1,9 +1,10 @@
 import { LoadingAlert, NotificationAlert } from "@/components/NotificationModal";
-import { functions } from "@/firebaseConfig";
+import { functions, storage } from "@/firebaseConfig";
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { httpsCallable } from "firebase/functions";
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { useState } from 'react';
 import {
   Image,
@@ -15,7 +16,6 @@ import {
   View
 } from 'react-native';
 import { Button, Menu, Text, TextInput } from 'react-native-paper';
-
 
 export default function NewUserForm() {
   const router = useRouter();
@@ -31,7 +31,6 @@ export default function NewUserForm() {
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationType, setNotificationType] = useState('info');
-  
 
   const pickImage = async () => {
     try {
@@ -70,18 +69,39 @@ export default function NewUserForm() {
     }
 
     const createNewUser = httpsCallable(functions, 'createNewUser');
-
     setLoading(true);
+
     try {
-      const result = await createNewUser({
+      let downloadURL = '';
+      if (image) {
+        // Get file name
+        const fileName = image.split('/').pop() || `image_${Date.now()}.jpeg`;
+
+        // Fetch blob from image URI
+        const res = await fetch(image);
+        const blob = await res.blob();
+
+        // Upload to Firebase Storage
+        const storageRef = ref(storage, `images/user-profile/${fileName}`);
+        await uploadBytes(storageRef, blob, {
+          contentType: 'image/jpeg',
+        });
+
+        downloadURL = await getDownloadURL(storageRef);
+        console.log('Upload successful:', fileName);
+      }
+
+      const userData = {
         name: name,
         email: email,
         password: password1,
         role: role,
-        image: image,
+        image: downloadURL,
         status: 'verified',
         joined: new Date().toISOString(),
-      });
+      }
+
+      await createNewUser(userData);
 
       setNotificationVisible(true);
       setNotificationMessage('User created successfully.');

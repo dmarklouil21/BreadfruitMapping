@@ -19,7 +19,7 @@ export function AuthGate() {
       if (user?.role === 'admin') {
         router.replace('/admin/(tabs)');
       } else if (user?.role === 'researcher') {
-        router.replace('/main/(tabs)');
+        router.replace('/researcher/(tabs)');
       } else if (user?.role === 'viewer') {
         router.replace('/viewer/(tabs)/map');
       } 

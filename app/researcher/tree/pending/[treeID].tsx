@@ -1,8 +1,8 @@
 import { LoadingAlert, NotificationAlert } from '@/components/NotificationModal';
 import { useTreeData } from '@/hooks/useTreeData';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { Link, useLocalSearchParams } from 'expo-router';
-import { deleteDoc, doc, getFirestore, updateDoc } from "firebase/firestore";
+import { useLocalSearchParams } from 'expo-router';
+import { deleteDoc, doc, getFirestore } from "firebase/firestore";
 import { useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Card, Text } from 'react-native-paper';
@@ -17,11 +17,11 @@ export default function TreeDetailsModal() {
   const [notificationType, setNotificationType] = useState('info');
   const tree = trees[0];
 
-  const handleDelete = async (treeID: string) => {
-    Alert.alert('Confirm Deletion', 'Are you sure you want to delete this tree?', [
+  const handleCancel = async (treeID: string) => {
+    Alert.alert('Confirm Cancel', 'Are you sure you want to cancel adding this tree?', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Delete',
+        text: 'Confirm',
         style: 'destructive',
         onPress: async () => {
           setLoading(true);
@@ -30,7 +30,7 @@ export default function TreeDetailsModal() {
             await deleteDoc(doc(db, 'trees', treeID));
             // await db.collection('trees').doc(treeID).delete();
             setNotificationVisible(true);
-            setNotificationMessage('Successfully deleted.');
+            setNotificationMessage('Successfully cancelled.');
             setNotificationType('success');
           } catch (error) {
             console.error(error);
@@ -42,34 +42,6 @@ export default function TreeDetailsModal() {
     ])
   }
 
-  const handleApprove = (treeID: string) => {
-    Alert.alert('Confirm Approve', 'Are you sure you want to approve this tree?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Approve',
-        style: 'destructive',
-        onPress: async () => {
-          setLoading(true);
-          try {
-            const db = getFirestore();
-            const docRef = doc(db, 'trees', treeID);
-            
-            await updateDoc(docRef, {
-              status: 'verified',
-            });
-
-            setNotificationVisible(true);
-            setNotificationMessage('Successfully approved!');
-            setNotificationType('success');
-          } catch(error) {
-            console.error(error);
-          } finally {
-            setLoading(false);
-          }
-        },
-      },
-    ])
-  }
 
   if (isLoading) {
     return (
@@ -158,9 +130,15 @@ export default function TreeDetailsModal() {
           </Card.Content>
         </Card>
 
-        {tree.status === 'pending' ? (
+        <View style={styles.buttonGroup}>
+          {/* <Button mode="contained" style={styles.button}>Cancel</Button> */}
+          <Button mode="contained" onPress={() => handleCancel(tree.treeID)} style={[styles.button, styles.updateButton]}>
+            Cancel
+          </Button>
+        </View>
+        {/* {tree.status === 'pending' ? (
           <View style={styles.buttonGroup}>
-            <Button mode="contained" style={styles.button} onPress={() => handleApprove(tree.treeID)}>Approve</Button>
+            <Button mode="contained" style={styles.button}>Cancel</Button>
             <Button mode="contained" onPress={() => handleDelete(tree.treeID)} style={[styles.button, styles.updateButton]}>
               Reject
             </Button>
@@ -174,7 +152,7 @@ export default function TreeDetailsModal() {
               Delete
             </Button>
           </View>
-        )}
+        )} */}
       </View>
     </ScrollView>
   );

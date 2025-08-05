@@ -45,9 +45,9 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="tree-list"
+        name="tree-management"
         options={{
-          title: 'Tree List',
+          title: 'Trees',
           headerRight: () => (
             <Pressable onPress={() => router.push('../search')}>
               <MaterialCommunityIcons
@@ -59,7 +59,7 @@ export default function TabsLayout() {
             </Pressable>
           ),
           tabBarIcon: ({ color }) => (
-            <MaterialIcons name="list" size={24} color={color} />
+            <MaterialIcons name="forest" size={24} color={color} />
           ),
         }}
       />

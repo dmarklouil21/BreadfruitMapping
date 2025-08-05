@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 export default {
   expo: {
-    name: "BreadfruitMapping",
+    name: "Breadfruit Tracker",
     slug: "BreadfruitMapping",
     version: "1.0.0",
     orientation: "portrait",

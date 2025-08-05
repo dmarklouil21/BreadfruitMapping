@@ -1,8 +1,10 @@
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'expo-router';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Avatar, Button, Text } from 'react-native-paper';
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { user, logout } = useAuth();
 
   // Get initials for avatar
@@ -28,30 +30,38 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <Avatar.Text 
-        size={80} 
-        label={getInitials()} 
-        style={styles.avatar}
-        color="#ffffff"
-        theme={{ colors: { primary: '#2ecc71' } }}
-      />
+      {user?.image ? (
+        <Avatar.Image 
+          size={80} 
+          source={{ uri: user.image }} 
+          style={styles.avatar}
+        />
+      ) : (
+        <Avatar.Text 
+          size={80} 
+          label={getInitials()} 
+          style={styles.avatar}
+          color="#ffffff"
+          theme={{ colors: { primary: '#2ecc71' } }}
+        />
+      )}
       
       <Text variant="titleLarge" style={styles.name}>
         {user?.name || 'Guest User'}
       </Text>
       
       <Text variant="bodyMedium" style={styles.email}>
-        {user?.email || 'No email provided'}
+        {user?.role || 'No email provided'}
       </Text>
 
       <Button 
         mode="contained" 
-        onPress={handleLogout}
+        onPress={() => router.navigate(`../user/edit/${user?.uid}`)}
         style={styles.button}
         labelStyle={styles.buttonLabel}
-        icon="logout"
+        icon="account-edit"
       >
-        Logout
+        Edit Profile
       </Button>
 
       <View style={styles.section}>
@@ -90,7 +100,17 @@ export default function ProfileScreen() {
           icon="history"
           textColor="#333"
         >
-          Track History
+          Activity Log
+        </Button>
+
+        <Button 
+          mode="text"
+          style={styles.settingButton}
+          icon="logout"
+          textColor="#333"
+          onPress={handleLogout}
+        >
+          Logout
         </Button>
       </View>
     </View>
@@ -148,3 +168,4 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
   },
 });
+

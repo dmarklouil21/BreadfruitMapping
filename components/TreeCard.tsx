@@ -1,20 +1,36 @@
+import { useAuth } from '@/context/AuthContext';
 import { Tree } from '@/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 
-export default function TreeCard ({ tree }: { tree: Tree }) { 
+type TreeCardProps = {
+  tree: Tree;
+  stringPath: string;
+}
+
+export default function TreeCard ({ tree, stringPath }: TreeCardProps) { 
+  const { user } = useAuth();
+
+  // const stringPath = user?.role === 'admin' ? `./details/${tree.treeID}` : '/app/researcher/(tabs)/map';
+
   return (
     <Link
       href={{
-        pathname: './map',
+        /* pathname: user?.role === 'admin'
+          ? `./details/${tree.treeID}` //stringPath,
+          : tree.status === 'pending' 
+          ? `./pending/${tree.treeID}`
+          // ? `/app/researcher/tree/pending/${tree.treeID}`
+          : '../(tabs)/map', */
+        pathname: stringPath,
         params: {
           lat: tree.coordinates.latitude,
           lng: tree.coordinates.longitude,
-          treeId: tree.id
+          // treeID: tree.treeID
         }
-      }}
+      } as any}
       asChild
     >
       <Pressable>
@@ -22,7 +38,7 @@ export default function TreeCard ({ tree }: { tree: Tree }) {
           <Card.Content>
             <Text style={styles.treeID}>
               <MaterialCommunityIcons name="tree" size={16} color="#2ecc71" />
-              {'  '}Tree #{tree.id}
+              {'  '}{tree.treeID}
             </Text>
             <Text style={styles.treeDetail}>
               <MaterialCommunityIcons name="map-marker" size={14} color="#666" />

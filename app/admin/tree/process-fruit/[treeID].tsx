@@ -1,19 +1,16 @@
-// components/UserEditForm.tsx
-import { useState } from 'react';
-import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
-import { Button, TextInput, Text, Menu } from 'react-native-paper';
-import { Tree } from '@/types';
-import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
-import { mockTrees } from '@/data/mockTrees';
+import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Button, Text, TextInput } from 'react-native-paper';
 
 export default function ProcessTreeFruit() {
   const { treeID } = useLocalSearchParams();
-  const tree = mockTrees.find(u => u.id === treeID);
+  // const tree = mockTrees.find(u => u.id === treeID);
   // const [formData, setFormData] = useState(initialValues);
   // const [showRoleMenu, setShowRoleMenu] = useState(false);
-  const [image, setImage] = useState(tree?.image || null);
+  const [image, setImage] = useState('');
 
   const pickImage = async () => {
     try {
@@ -59,7 +56,7 @@ export default function ProcessTreeFruit() {
 
       <TextInput
         label="Breadfruit ID"
-        value={tree?.id}
+        // value={tree?.id}
         // onChangeText={text => setFormData({...formData, name: text})}
         style={styles.input}
         autoCapitalize="words"
@@ -67,7 +64,7 @@ export default function ProcessTreeFruit() {
 
       <TextInput
         label="Location"
-        value={tree?.city}
+        // value={tree?.city}
         // onChangeText={text => setFormData({...formData, username: text})}
         style={styles.input}
         autoCapitalize="none"
@@ -75,7 +72,7 @@ export default function ProcessTreeFruit() {
 
       <TextInput
         label="Diameter"
-        value={tree?.diameter.toString()}
+        // value={tree?.diameter.toString()}
         //onChangeText={text => setFormData({...formData, email: text})}
         style={styles.input}
         autoCapitalize="none"
@@ -83,7 +80,7 @@ export default function ProcessTreeFruit() {
 
       <TextInput
         label="Fruit Status"
-        value={tree?.fruitStatus}
+        // value={tree?.fruitStatus}
         //onChangeText={text => setFormData({...formData, email: text})}
         style={styles.input}
         autoCapitalize="none"

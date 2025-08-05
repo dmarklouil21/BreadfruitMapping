@@ -1,10 +1,12 @@
 import TreeCard from '@/components/TreeCard';
+import { useAuth } from '@/context/AuthContext';
 import { useTreeData } from '@/hooks/useTreeData';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
-import { Chip, Text } from 'react-native-paper';
+import { Chip, FAB, Text } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const TreeFilter = ({ selected, onSelect }: { 
@@ -35,7 +37,13 @@ const TreeFilter = ({ selected, onSelect }: {
 };
 
 export default function TreeListScreen() {
-  const { trees, isLoading, error } = useTreeData(); 
+  const { user } = useAuth();
+  const { trees, isLoading, error } = useTreeData({
+    mode: 'criteria',
+    field: 'trackedBy',
+    operator: '==',
+    value: user?.name,
+  }); 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('All'); 
   const router = useRouter();
@@ -69,14 +77,14 @@ export default function TreeListScreen() {
   if (error) return <ErrorView message={error} />;
 
   return (
-    // <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <TreeFilter selected={selectedStatus} onSelect={setSelectedStatus} />
 
         <FlatList
           data={filteredTrees}
           keyExtractor={item => item.treeID}
-          renderItem={({ item }) => <TreeCard tree={item} stringPath={'../(tabs)/map'}/>}
+          renderItem={({ item }) => <TreeCard tree={item} stringPath={'/researcher/(tabs)/map'}/>}
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <MaterialCommunityIcons name="tree" size={40} color="#888" />
@@ -86,14 +94,14 @@ export default function TreeListScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
         />
-        {/* <FAB
+        <FAB
           icon="filter"
           style={styles.fab}
           color="white"
           onPress={() => router.push('../tree/add-tree')} 
-        /> */}
+        />
       </View>
-    // </SafeAreaView>
+    </SafeAreaView>
   );
 }
 
